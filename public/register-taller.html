@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taller360 — Registrar taller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/shared/app-config.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+    <div class="mx-auto flex min-h-screen max-w-lg flex-col justify-center p-6">
+      <a href="/login.html" class="mb-6 text-sm text-indigo-400 hover:text-indigo-300">← Volver al acceso</a>
+      <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-xl">
+        <h1 class="text-xl font-bold text-white">Registrar nuevo taller</h1>
+        <p class="mt-1 text-sm text-slate-400">Crea usuario en Supabase Auth, el taller y tu perfil de dueño.</p>
+        <form id="form-reg" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Nombre del taller</label>
+            <input name="workshopName" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">RIF (opcional)</label>
+            <input name="rif" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Tu nombre completo</label>
+            <input name="fullName" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Correo (usuario)</label>
+            <input type="email" name="email" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Contraseña</label>
+            <input type="password" name="password" required minlength="6" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2" />
+          </div>
+          <p id="msg" class="hidden text-sm"></p>
+          <button type="submit" class="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500">
+            Crear taller
+          </button>
+        </form>
+      </div>
+    </div>
+    <script type="module">
+      const cfg = window.TALLER360;
+
+      document.getElementById('form-reg').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = Object.fromEntries(fd.entries());
+        const msg = document.getElementById('msg');
+        msg.classList.add('hidden');
+        try {
+          const res = await fetch(`${cfg.API_BASE}/api/auth/register-taller`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const j = await res.json();
+          if (!res.ok) {
+            msg.textContent = j.error || 'Error al registrar';
+            msg.className = 'text-sm text-rose-400';
+            msg.classList.remove('hidden');
+            return;
+          }
+          msg.textContent = j.message || 'Listo. Ya puede iniciar sesión.';
+          msg.className = 'text-sm text-emerald-400';
+          msg.classList.remove('hidden');
+        } catch (err) {
+          msg.textContent = 'No se pudo contactar al servidor';
+          msg.className = 'text-sm text-rose-400';
+          msg.classList.remove('hidden');
+        }
+      });
+    </script>
+  </body>
+</html>

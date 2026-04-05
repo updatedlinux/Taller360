@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taller360 — Acceso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/shared/app-config.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+    <div class="flex min-h-screen items-center justify-center p-6">
+      <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-xl backdrop-blur">
+        <div class="mb-8 text-center">
+          <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Arsys Intela</p>
+          <h1 class="mt-2 text-2xl font-bold text-white">Taller360</h1>
+          <p class="mt-1 text-sm text-slate-400">Un solo acceso · portales según tu rol</p>
+        </div>
+        <form id="form-login" class="space-y-4">
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Correo</label>
+            <input
+              type="email"
+              name="email"
+              required
+              class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none ring-indigo-500 focus:ring-2"
+              autocomplete="username"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              required
+              class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none ring-indigo-500 focus:ring-2"
+              autocomplete="current-password"
+            />
+          </div>
+          <p id="msg" class="hidden text-sm text-rose-400"></p>
+          <button
+            type="submit"
+            class="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
+          >
+            Entrar
+          </button>
+        </form>
+        <p class="mt-6 text-center text-sm text-slate-500">
+          ¿Nuevo taller?
+          <a href="/register-taller.html" class="font-medium text-indigo-400 hover:text-indigo-300">Registrar taller</a>
+        </p>
+      </div>
+    </div>
+    <script type="module">
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+      const cfg = window.TALLER360;
+      const key = cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY;
+      const supabase = createClient(cfg.SUPABASE_URL, key);
+
+      function showErr(t) {
+        const el = document.getElementById('msg');
+        el.textContent = t;
+        el.classList.remove('hidden');
+      }
+
+      function portalForRole(role) {
+        if (role === 'SUPERADMIN') return '/admin/index.html';
+        if (role === 'OWNER') return '/taller/index.html';
+        if (role === 'CLIENT') return '/cliente/index.html';
+        return null;
+      }
+
+      document.getElementById('form-login').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const email = fd.get('email');
+        const password = fd.get('password');
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          showErr(error.message);
+          return;
+        }
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (!token) {
+          showErr('No se obtuvo sesión');
+          return;
+        }
+        const { data: profile, error: pErr } = await supabase.from('profiles').select('role').single();
+        if (pErr || !profile) {
+          showErr('No existe perfil para este usuario');
+          return;
+        }
+        const dest = portalForRole(profile.role);
+        if (!dest) {
+          showErr('Rol no reconocido');
+          return;
+        }
+        window.location.href = dest;
+      });
+    </script>
+  </body>
+</html>
