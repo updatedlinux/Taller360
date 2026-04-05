@@ -47,7 +47,7 @@ export function mapLoginErrorMessage(error) {
 }
 
 export const PROFILE_MISSING_MESSAGE =
-  'Tu cuenta no tiene perfil en el sistema. Contacta al administrador del taller o a Arsys Intela. Se cerrará la sesión.';
+  'No hay fila en public.profiles para tu usuario (o RLS no deja verla). En Supabase: Authentication → copia el UUID del usuario y ejecuta INSERT en public.profiles con ese id, rol y datos. Se cerró la sesión.';
 
 /**
  * Cierra sesión Supabase y redirige al login.
@@ -74,11 +74,12 @@ export async function fetchMyProfile(supabase, userId) {
       error: Object.assign(new Error('Falta el id de usuario para cargar el perfil.'), { code: 'MISSING_USER_ID' }),
     };
   }
+  // maybeSingle: 0 filas → data null sin error HTTP 406 (.single() falla con "Cannot coerce…")
   const { data, error } = await supabase
     .from('profiles')
     .select('id, tenant_id, full_name, role, created_at')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
   return { profile: data, error };
 }
 

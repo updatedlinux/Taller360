@@ -30,7 +30,7 @@ async function requireAuth(req, res, next) {
       .from('profiles')
       .select('id, tenant_id, full_name, role, created_at')
       .eq('id', authUser.id)
-      .single();
+      .maybeSingle();
 
     if (profileResult.error || !profileResult.data) {
       throw httpError(403, 'Perfil no encontrado. Contacte al administrador.');
