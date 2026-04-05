@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Talleres — SuperAdmin · Taller360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/admin/css/admin.css" />
+    <script src="/shared/js/config.js"></script>
+    <script type="module" src="/shared/js/supabase-client.js"></script>
+    <script type="module" src="/shared/js/auth.js"></script>
+  </head>
+  <body class="min-h-screen bg-[#1e293b] font-sans text-slate-100 antialiased">
+    <div id="admin-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/60 lg:hidden" aria-hidden="true"></div>
+
+    <aside
+      id="admin-sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-slate-800 bg-[#0f172a] transition-transform duration-200 lg:translate-x-0"
+    >
+      <button
+        type="button"
+        id="btn-sidebar-close"
+        class="absolute right-2 top-2 rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+        aria-label="Cerrar menú"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="sidebar-nav-mount" class="flex min-h-0 flex-1 flex-col"></div>
+    </aside>
+
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-700/80 bg-[#0f172a]/95 px-4 py-3 backdrop-blur sm:px-6">
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            id="btn-sidebar-open"
+            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+            aria-label="Abrir menú"
+          >
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-lg font-semibold text-white">Talleres</h1>
+            <p class="text-xs text-slate-500">Gestión de tenants · Supabase</p>
+          </div>
+        </div>
+        <p id="header-user-name" class="hidden max-w-[200px] truncate text-sm text-slate-400 sm:block"></p>
+      </header>
+
+      <main class="p-4 sm:p-6">
+        <p id="err" class="mb-4 hidden rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></p>
+        <p id="toast" class="mb-4 hidden rounded-xl px-4 py-3 text-sm"></p>
+
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-500" for="filter-search">Buscar</label>
+              <input
+                id="filter-search"
+                type="search"
+                placeholder="Nombre o RIF…"
+                class="w-full min-w-[200px] rounded-xl border border-slate-600 bg-[#334155] px-3 py-2 text-sm text-white placeholder-slate-500 outline-none ring-blue-500/40 focus:ring-2 sm:w-64"
+              />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-slate-500" for="filter-status">Estado</label>
+              <select
+                id="filter-status"
+                class="w-full rounded-xl border border-slate-600 bg-[#334155] px-3 py-2 text-sm text-white outline-none ring-blue-500/40 focus:ring-2 sm:w-44"
+              >
+                <option value="all">Todos</option>
+                <option value="active">Activos</option>
+                <option value="suspended">Suspendidos</option>
+                <option value="pending">Pendientes</option>
+              </select>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-open-register"
+            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 hover:bg-blue-500"
+          >
+            Registrar nuevo taller
+          </button>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-600/50 bg-[#334155] shadow-xl shadow-black/20">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px] text-left text-sm">
+              <thead class="border-b border-slate-600/80 bg-slate-800/40 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th class="px-4 py-3">Nombre</th>
+                  <th class="px-4 py-3">RIF</th>
+                  <th class="px-4 py-3">Plan</th>
+                  <th class="px-4 py-3">Estado</th>
+                  <th class="px-4 py-3">Email owner</th>
+                  <th class="px-4 py-3">Registro</th>
+                  <th class="px-4 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-tenants" class="divide-y divide-slate-700/50"></tbody>
+            </table>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-600/60 px-4 py-3">
+            <p id="pagination-meta" class="text-sm text-slate-500"></p>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                id="btn-prev"
+                class="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-40"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                id="btn-next"
+                class="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 disabled:opacity-40"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-700/60 px-4 py-4 text-center text-xs text-slate-600 sm:px-6">
+        Potenciado por <span class="text-slate-500">ARSYS INTELA</span>
+      </footer>
+    </div>
+
+    <!-- Modal registrar -->
+    <div
+      id="modal-register"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-register-title"
+    >
+      <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-600 bg-[#334155] p-6 shadow-2xl">
+        <h2 id="modal-register-title" class="text-lg font-semibold text-white">Registrar nuevo taller</h2>
+        <p class="mt-1 text-sm text-slate-400">Se crea con estado <span class="text-amber-300">pending</span>. Vincula al owner cuando tenga cuenta en Auth.</p>
+        <form id="form-register-tenant" class="mt-6 space-y-4">
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Nombre del taller *</label>
+            <input name="name" required class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">RIF</label>
+            <input name="rif" class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Teléfono</label>
+            <input name="phone" type="tel" class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Email del owner</label>
+            <input name="owner_email" type="email" class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Dirección</label>
+            <textarea name="address" rows="2" class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2"></textarea>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm text-slate-300">Plan</label>
+            <select name="plan" class="w-full rounded-xl border border-slate-600 bg-[#1e293b] px-3 py-2 text-white outline-none ring-blue-500/40 focus:ring-2">
+              <option value="basic">basic</option>
+              <option value="pro">pro</option>
+            </select>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" id="modal-register-cancel" class="rounded-xl border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+              Cancelar
+            </button>
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal detalle -->
+    <div
+      id="modal-detail"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="w-full max-w-md rounded-2xl border border-slate-600 bg-[#334155] p-6 shadow-2xl">
+        <h2 class="text-lg font-semibold text-white">Detalle del taller</h2>
+        <dl class="mt-4 space-y-2 text-sm">
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Nombre</dt>
+            <dd id="detail-name" class="text-right font-medium text-slate-100"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">RIF</dt>
+            <dd id="detail-rif" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Plan</dt>
+            <dd id="detail-plan" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Estado</dt>
+            <dd id="detail-status" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Email owner</dt>
+            <dd id="detail-owner-email" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Teléfono</dt>
+            <dd id="detail-phone" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Dirección</dt>
+            <dd id="detail-address" class="break-all text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">Creado</dt>
+            <dd id="detail-created" class="text-right text-slate-200"></dd>
+          </div>
+          <div class="flex justify-between gap-2 border-b border-slate-600/50 py-2">
+            <dt class="text-slate-500">ID</dt>
+            <dd id="detail-id" class="break-all text-right font-mono text-xs text-slate-400"></dd>
+          </div>
+          <div class="flex justify-between gap-2 py-2">
+            <dt class="text-slate-500">Owner (auth id)</dt>
+            <dd id="detail-owner-id" class="break-all text-right font-mono text-xs text-slate-400"></dd>
+          </div>
+        </dl>
+        <button type="button" id="modal-detail-close" class="mt-6 w-full rounded-xl bg-slate-700 py-2 text-sm font-medium text-white hover:bg-slate-600">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="/admin/js/talleres.js"></script>
+  </body>
+</html>

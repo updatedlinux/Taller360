@@ -1,0 +1,5 @@
+/* Complemento al panel admin (Tailwind CDN cubre casi todo) */
+#admin-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(51 65 85) transparent;
+}

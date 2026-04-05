@@ -3,152 +3,172 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SuperAdmin — Taller360 · Arsys Intela</title>
+    <title>Dashboard — SuperAdmin · Taller360</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/admin/css/admin.css" />
     <script src="/shared/js/config.js"></script>
     <script type="module" src="/shared/js/supabase-client.js"></script>
     <script type="module" src="/shared/js/auth.js"></script>
-    <style>
-      body { font-family: 'DM Sans', system-ui, sans-serif; }
-      .bar { transition: height 0.4s ease; }
-    </style>
   </head>
-  <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
-    <header class="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Arsys Intela</p>
-          <h1 class="text-lg font-bold text-white">SuperAdmin</h1>
+  <body class="min-h-screen bg-[#1e293b] font-sans text-slate-100 antialiased">
+    <div id="admin-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/60 lg:hidden" aria-hidden="true"></div>
+
+    <aside
+      id="admin-sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-slate-800 bg-[#0f172a] transition-transform duration-200 lg:translate-x-0"
+    >
+      <button
+        type="button"
+        id="btn-sidebar-close"
+        class="absolute right-2 top-2 rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+        aria-label="Cerrar menú"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="sidebar-nav-mount" class="flex min-h-0 flex-1 flex-col"></div>
+    </aside>
+
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-700/80 bg-[#0f172a]/95 px-4 py-3 backdrop-blur sm:px-6">
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            id="btn-sidebar-open"
+            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+            aria-label="Abrir menú"
+          >
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-lg font-semibold text-white">Dashboard</h1>
+            <p class="text-xs text-slate-500">Resumen general del ecosistema Taller360</p>
+          </div>
         </div>
-        <button type="button" id="btn-out" class="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800">Salir</button>
-      </div>
-    </header>
+        <p id="header-user-name" class="hidden max-w-[200px] truncate text-sm text-slate-400 sm:block"></p>
+      </header>
 
-    <main class="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
-      <p id="err" class="hidden rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></p>
+      <main class="p-4 sm:p-6">
+        <p id="err" class="mb-4 hidden rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></p>
 
-      <section>
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Resumen</h2>
-        <div class="mt-4 grid gap-4 sm:grid-cols-2">
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p class="text-sm text-slate-400">Talleres activos</p>
-            <div class="mt-4 flex items-end gap-2">
-              <div id="chart-active" class="bar flex w-8 items-end justify-center rounded-t bg-indigo-500" style="height: 8px"></div>
-              <div id="chart-total" class="bar flex w-8 items-end justify-center rounded-t bg-slate-600" style="height: 8px"></div>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="rounded-2xl border border-slate-600/50 bg-[#334155] p-5 shadow-lg shadow-black/20">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-sm font-medium text-slate-400">Talleres registrados</p>
+                <p id="metric-total-tenants" class="mt-2 text-3xl font-bold text-white">—</p>
+                <p class="mt-1 text-xs text-slate-500">Total en <span class="text-slate-400">public.tenants</span></p>
+              </div>
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </span>
             </div>
-            <div class="mt-2 flex gap-6 text-xs text-slate-500">
-              <span><span class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span> Activos: <strong id="n-active" class="text-white">—</strong></span>
-              <span><span class="inline-block h-2 w-2 rounded-full bg-slate-600"></span> Total: <strong id="n-total" class="text-white">—</strong></span>
+            <p class="mt-3 text-xs text-emerald-400/90">↑ Datos en vivo vía Supabase</p>
+          </article>
+
+          <article class="rounded-2xl border border-slate-600/50 bg-[#334155] p-5 shadow-lg shadow-black/20">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-sm font-medium text-slate-400">Talleres activos</p>
+                <p id="metric-active-tenants" class="mt-2 text-3xl font-bold text-emerald-400">—</p>
+                <p class="mt-1 text-xs text-slate-500">Estado <span class="text-emerald-300">active</span></p>
+              </div>
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+            </div>
+            <p class="mt-3 text-xs text-slate-500">Operativos en la plataforma</p>
+          </article>
+
+          <article class="rounded-2xl border border-slate-600/50 bg-[#334155] p-5 shadow-lg shadow-black/20">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-sm font-medium text-slate-400">Usuarios totales</p>
+                <p id="metric-profiles" class="mt-2 text-3xl font-bold text-white">—</p>
+                <p class="mt-1 text-xs text-slate-500">Filas en <span class="text-slate-400">public.profiles</span></p>
+              </div>
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            </div>
+            <p class="mt-3 text-xs text-slate-500">Incluye todos los roles</p>
+          </article>
+
+          <article class="rounded-2xl border border-slate-600/50 bg-[#334155] p-5 shadow-lg shadow-black/20">
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-sm font-medium text-slate-400">Ingresos estimados</p>
+                <p id="metric-mrr" class="mt-2 text-3xl font-bold text-amber-400">—</p>
+                <p class="mt-1 text-xs text-slate-500">Suma planes activos: basic $10 · pro $20 / mes</p>
+              </div>
+              <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+            </div>
+            <p class="mt-3 text-xs text-amber-200/70">Estimación mensual (USD)</p>
+          </article>
+        </div>
+
+        <section class="mt-10">
+          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-base font-semibold text-white">Talleres recientes</h2>
+              <p class="text-sm text-slate-500">Últimos 10 registros por fecha de creación</p>
+            </div>
+            <a
+              href="/admin/talleres.html"
+              class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition hover:bg-blue-500"
+            >
+              Ver todos
+            </a>
+          </div>
+          <div class="overflow-hidden rounded-2xl border border-slate-600/50 bg-[#334155] shadow-xl shadow-black/20">
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[720px] text-left text-sm">
+                <thead class="border-b border-slate-600/80 bg-slate-800/40 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <tr>
+                    <th class="px-4 py-3">Nombre</th>
+                    <th class="px-4 py-3">RIF</th>
+                    <th class="px-4 py-3">Plan</th>
+                    <th class="px-4 py-3">Estado</th>
+                    <th class="px-4 py-3">Registro</th>
+                    <th class="px-4 py-3 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-recent" class="divide-y divide-slate-700/50"></tbody>
+              </table>
             </div>
           </div>
-          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
-            <p class="text-sm text-slate-400">Ingresos suscripción (estimado)</p>
-            <p class="mt-2 text-2xl font-bold text-emerald-400" id="revenue-mock">—</p>
-            <p class="mt-1 text-xs text-slate-500">Placeholder: <span id="plan-pro">0</span> talleres plan pro × tarifa mensual simulada.</p>
-            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-800">
-              <div id="rev-bar" class="h-full w-0 rounded-full bg-emerald-500 transition-all duration-500"></div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <section>
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Tenants</h2>
-        <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
-          <table class="w-full min-w-[640px] text-left text-sm">
-            <thead class="border-b border-slate-800 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-4 py-3">Nombre</th>
-                <th class="px-4 py-3">Plan</th>
-                <th class="px-4 py-3">Estado</th>
-                <th class="px-4 py-3 text-right">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+      <footer class="border-t border-slate-700/60 px-4 py-4 text-center text-xs text-slate-600 sm:px-6">
+        Potenciado por <span class="text-slate-500">ARSYS INTELA</span>
+      </footer>
+    </div>
 
-    <script type="module">
-      import { apiJson } from '/shared/js/api.js';
-      import { guardDashboard, subscribeAuthRedirect, logout, loadSuperAdminData } from '/shared/js/auth.js';
-
-      document.getElementById('btn-out').addEventListener('click', () => logout());
-
-      const ctx = await guardDashboard({ allowedRoles: ['SUPERADMIN'] });
-      const errEl = document.getElementById('err');
-
-      if (ctx) {
-      subscribeAuthRedirect(ctx.supabase);
-
-      try {
-        const loaded = await loadSuperAdminData(ctx.accessToken);
-        if (!loaded) {
-          throw new Error('Sesión finalizada');
-        }
-        const dash = { data: loaded.dashboard };
-        const total = dash.data.tenantsTotal || 0;
-        const active = dash.data.tenantsActive || 0;
-        document.getElementById('n-total').textContent = total;
-        document.getElementById('n-active').textContent = active;
-        const max = Math.max(total, 1);
-        document.getElementById('chart-total').style.height = `${8 + (total / max) * 80}px`;
-        document.getElementById('chart-active').style.height = `${8 + (active / max) * 80}px`;
-
-        const list = loaded.tenants || [];
-        const pro = list.filter((t) => t.plan === 'pro').length;
-        document.getElementById('plan-pro').textContent = pro;
-        const mockFee = 49;
-        const revenue = pro * mockFee;
-        document.getElementById('revenue-mock').textContent = new Intl.NumberFormat('es-VE', {
-          style: 'currency',
-          currency: 'USD',
-        }).format(revenue);
-        document.getElementById('rev-bar').style.width = `${Math.min(100, pro * 20)}%`;
-
-        const tb = document.getElementById('tbody');
-        tb.innerHTML = list
-          .map(
-            (t) => `
-          <tr class="border-b border-slate-800/80 hover:bg-slate-800/30">
-            <td class="px-4 py-3 font-medium text-white">${t.name}</td>
-            <td class="px-4 py-3 text-slate-300">${t.plan}</td>
-            <td class="px-4 py-3">
-              <span class="rounded-full px-2 py-0.5 text-xs ${t.status === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-200'}">${t.status}</span>
-            </td>
-            <td class="px-4 py-3 text-right">
-              ${
-                t.status === 'active'
-                  ? `<button type="button" data-id="${t.id}" data-action="suspend" class="rounded-lg bg-amber-600/90 px-3 py-1 text-xs font-medium text-white hover:bg-amber-500">Suspender</button>`
-                  : `<button type="button" data-id="${t.id}" data-action="activate" class="rounded-lg bg-emerald-600/90 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-500">Activar</button>`
-              }
-            </td>
-          </tr>`,
-          )
-          .join('');
-
-        tb.addEventListener('click', async (e) => {
-          const btn = e.target.closest('button[data-id]');
-          if (!btn) return;
-          const id = btn.getAttribute('data-id');
-          const action = btn.getAttribute('data-action');
-          const status = action === 'suspend' ? 'suspended' : 'active';
-          try {
-            await apiJson(`/api/admin/tenants/${id}`, ctx.accessToken, { method: 'PATCH', body: { status } });
-            window.location.reload();
-          } catch (err) {
-            errEl.textContent = err.message;
-            errEl.classList.remove('hidden');
-          }
-        });
-      } catch (e) {
-        errEl.textContent = e.message || 'Error';
-        errEl.classList.remove('hidden');
-      }
-      }
-    </script>
+    <script type="module" src="/admin/js/dashboard.js"></script>
   </body>
 </html>

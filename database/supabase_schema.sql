@@ -23,8 +23,11 @@ CREATE TABLE IF NOT EXISTS public.tenants (
   name text NOT NULL,
   rif text,
   plan text NOT NULL DEFAULT 'basic' CHECK (plan IN ('basic', 'pro')),
-  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
-  owner_id uuid NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'pending')),
+  owner_id uuid REFERENCES auth.users (id) ON DELETE CASCADE,
+  phone text,
+  address text,
+  owner_email text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -375,6 +378,46 @@ CREATE POLICY storage_vehicles_delete ON storage.objects FOR DELETE TO authentic
       )
     )
   );
+
+-- ---------------------------------------------------------------------------
+-- RPC: listado de perfiles + email (panel SuperAdmin en el navegador)
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.admin_profiles_list()
+RETURNS TABLE (
+  id uuid,
+  full_name text,
+  role text,
+  tenant_id uuid,
+  tenant_name text,
+  email text,
+  created_at timestamptz
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+  SELECT
+    p.id,
+    p.full_name,
+    p.role,
+    p.tenant_id,
+    t.name AS tenant_name,
+    COALESCE(u.email, '')::text AS email,
+    p.created_at
+  FROM public.profiles p
+  LEFT JOIN public.tenants t ON t.id = p.tenant_id
+  LEFT JOIN auth.users u ON u.id = p.id
+  WHERE EXISTS (
+    SELECT 1
+    FROM public.profiles pr
+    WHERE pr.id = auth.uid()
+      AND pr.role = 'SUPERADMIN'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_profiles_list() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.admin_profiles_list() TO authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Primer SUPERADMIN (ejecutar manualmente tras crear el usuario en Auth)

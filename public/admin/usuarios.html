@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuarios — SuperAdmin · Taller360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/admin/css/admin.css" />
+    <script src="/shared/js/config.js"></script>
+    <script type="module" src="/shared/js/supabase-client.js"></script>
+    <script type="module" src="/shared/js/auth.js"></script>
+  </head>
+  <body class="min-h-screen bg-[#1e293b] font-sans text-slate-100 antialiased">
+    <div id="admin-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/60 lg:hidden" aria-hidden="true"></div>
+
+    <aside
+      id="admin-sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-slate-800 bg-[#0f172a] transition-transform duration-200 lg:translate-x-0"
+    >
+      <button
+        type="button"
+        id="btn-sidebar-close"
+        class="absolute right-2 top-2 rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+        aria-label="Cerrar menú"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="sidebar-nav-mount" class="flex min-h-0 flex-1 flex-col"></div>
+    </aside>
+
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-slate-700/80 bg-[#0f172a]/95 px-4 py-3 backdrop-blur sm:px-6">
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            id="btn-sidebar-open"
+            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 lg:hidden"
+            aria-label="Abrir menú"
+          >
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-lg font-semibold text-white">Usuarios</h1>
+            <p class="text-xs text-slate-500">Perfiles del sistema · solo lectura</p>
+          </div>
+        </div>
+        <p id="header-user-name" class="hidden max-w-[200px] truncate text-sm text-slate-400 sm:block"></p>
+      </header>
+
+      <main class="p-4 sm:p-6">
+        <p id="err" class="mb-4 hidden rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></p>
+        <p id="toast" class="mb-4 hidden rounded-xl px-4 py-3 text-sm"></p>
+
+        <p id="email-hint" class="mb-4 hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          Para ver correos desde el navegador, ejecuta en Supabase la función RPC
+          <code class="rounded bg-slate-800 px-1">admin_profiles_list</code> del archivo
+          <code class="rounded bg-slate-800 px-1">database/migrations/002_superadmin_portal.sql</code>.
+        </p>
+
+        <div class="mb-4 flex flex-wrap items-end gap-4">
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-500" for="filter-role">Rol</label>
+            <select
+              id="filter-role"
+              class="rounded-xl border border-slate-600 bg-[#334155] px-3 py-2 text-sm text-white outline-none ring-blue-500/40 focus:ring-2"
+            >
+              <option value="all">Todos</option>
+              <option value="SUPERADMIN">SUPERADMIN</option>
+              <option value="OWNER">OWNER</option>
+              <option value="CLIENT">CLIENT</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-slate-600/50 bg-[#334155] shadow-xl shadow-black/20">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[720px] text-left text-sm">
+              <thead class="border-b border-slate-600/80 bg-slate-800/40 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th class="px-4 py-3">Nombre</th>
+                  <th class="px-4 py-3">Email</th>
+                  <th class="px-4 py-3">Rol</th>
+                  <th class="px-4 py-3">Taller</th>
+                  <th class="px-4 py-3">Registro</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-usuarios" class="divide-y divide-slate-700/50"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-700/60 px-4 py-4 text-center text-xs text-slate-600 sm:px-6">
+        Potenciado por <span class="text-slate-500">ARSYS INTELA</span>
+      </footer>
+    </div>
+
+    <script type="module" src="/admin/js/usuarios.js"></script>
+  </body>
+</html>
