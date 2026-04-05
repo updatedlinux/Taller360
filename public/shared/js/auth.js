@@ -63,13 +63,22 @@ export async function logout() {
 }
 
 /**
- * Obtiene fila de public.profiles del usuario actual (RLS: solo la propia).
+ * Obtiene fila de public.profiles del usuario (RLS: solo la propia).
+ * @param {import('@supabase/supabase-js').SupabaseClient} supabase
+ * @param {string} userId - auth.users.id (ej. session.user.id)
  */
-export async function fetchMyProfile(supabase) {
+export async function fetchMyProfile(supabase, userId) {
+  if (!userId) {
+    return {
+      profile: null,
+      error: Object.assign(new Error('Falta el id de usuario para cargar el perfil.'), { code: 'MISSING_USER_ID' }),
+    };
+  }
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, tenant_id, full_name, role, client_id, created_at')
-    .maybeSingle();
+    .select('id, tenant_id, full_name, role, created_at')
+    .eq('id', userId)
+    .single();
   return { profile: data, error };
 }
 
@@ -91,7 +100,7 @@ export async function getAuthContext() {
     return { ok: false, reason: 'no_session', supabase };
   }
 
-  const { profile, error: profileError } = await fetchMyProfile(supabase);
+  const { profile, error: profileError } = await fetchMyProfile(supabase, session.user.id);
 
   if (profileError) {
     await supabase.auth.signOut();
@@ -168,7 +177,7 @@ export async function signInAndRedirectByRole(email, password) {
     return { ok: false, message: 'No se pudo obtener la sesión. Intenta de nuevo.' };
   }
 
-  const { profile, error: pErr } = await fetchMyProfile(supabase);
+  const { profile, error: pErr } = await fetchMyProfile(supabase, session.user.id);
   console.log('[Taller360 login] consulta profiles', {
     hasProfile: !!profile,
     profileRole: profile ? profile.role : null,
@@ -271,17 +280,22 @@ export async function loadOwnerTenantData(accessToken) {
 }
 
 /**
- * CLIENT: fila en public.clients + vehículos vía API.
+ * CLIENT: fila en public.clients (por email de Auth + tenant del perfil) + vehículos vía API.
  */
 export async function loadClientPortalData(ctx) {
   const { apiJson } = await import('./api.js');
-  if (!ctx.profile.client_id) {
-    throw new Error('Tu perfil no está vinculado a un cliente del taller.');
+  const email = (ctx.session && ctx.session.user && ctx.session.user.email && String(ctx.session.user.email).trim()) || '';
+  if (!email) {
+    throw new Error('No pudimos obtener el correo de tu cuenta.');
+  }
+  if (!ctx.profile.tenant_id) {
+    throw new Error('Tu perfil no tiene taller asignado.');
   }
   const { data: clientRow, error } = await ctx.supabase
     .from('clients')
     .select('*')
-    .eq('id', ctx.profile.client_id)
+    .eq('tenant_id', ctx.profile.tenant_id)
+    .eq('email', email)
     .maybeSingle();
   if (error) {
     throw new Error(error.message || 'No se pudo cargar tu ficha de cliente.');

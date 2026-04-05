@@ -57,7 +57,6 @@ async function registerNewWorkshop(input) {
         tenant_id: tenant.id,
         full_name: fullName,
         role: 'OWNER',
-        client_id: null,
       }),
     );
   } catch (e) {

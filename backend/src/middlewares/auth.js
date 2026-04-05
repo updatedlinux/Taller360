@@ -28,7 +28,7 @@ async function requireAuth(req, res, next) {
     const sb = createUserClient(token);
     const profileResult = await sb
       .from('profiles')
-      .select('id, tenant_id, full_name, role, client_id')
+      .select('id, tenant_id, full_name, role, created_at')
       .eq('id', authUser.id)
       .single();
 
@@ -37,15 +37,29 @@ async function requireAuth(req, res, next) {
     }
 
     const p = profileResult.data;
+    let resolvedClientId = null;
+    if (p.role === 'CLIENT' && p.tenant_id && authUser.email) {
+      const email = String(authUser.email).trim();
+      const clientRes = await sb
+        .from('clients')
+        .select('id')
+        .eq('tenant_id', p.tenant_id)
+        .eq('email', email)
+        .maybeSingle();
+      if (!clientRes.error && clientRes.data) {
+        resolvedClientId = clientRes.data.id;
+      }
+    }
+
     req.accessToken = token;
     req.authUser = authUser;
-    req.profile = p;
+    req.profile = Object.assign({}, p, { client_id: resolvedClientId });
     req.user = {
       id: p.id,
       tenant_id: p.tenant_id,
       full_name: p.full_name,
       role: p.role,
-      client_id: p.client_id,
+      client_id: resolvedClientId,
     };
     req.sb = sb;
     next();
