@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — Taller360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              patio: { received: '#475569', diag: '#7c3aed', repair: '#ea580c', ready: '#16a34a' },
+            },
+          },
+        },
+      };
+    </script>
+    <script src="/shared/app-config.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden" aria-hidden="true"></div>
+
+    <aside
+      id="sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-slate-800 bg-slate-900 text-white transition-transform duration-200 lg:translate-x-0"
+    >
+      <div class="flex h-16 items-center gap-2 border-b border-slate-800 px-4">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-600 text-sm font-bold">T</span>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-400">Taller360</p>
+          <p class="text-sm font-semibold text-white">Mi taller</p>
+        </div>
+      </div>
+      <nav class="flex-1 space-y-1 p-3">
+        <a href="/taller/dashboard.html" class="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white">
+          <span class="h-2 w-2 rounded-full bg-orange-400"></span>
+          Patios / Kanban
+        </a>
+        <span class="block px-3 py-2 text-xs text-slate-500">Próximamente: clientes, inventario…</span>
+      </nav>
+      <div class="border-t border-slate-800 p-3">
+        <button
+          type="button"
+          id="btn-logout"
+          class="w-full rounded-lg border border-slate-700 py-2 text-sm text-slate-300 hover:bg-slate-800"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <div class="lg:pl-64">
+      <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              id="btn-menu"
+              class="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 lg:hidden"
+              aria-label="Abrir menú"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div>
+              <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Panel del taller</h1>
+              <p class="text-xs text-slate-500 sm:text-sm">Vista de patios · arrastra mentalmente por etapa</p>
+            </div>
+          </div>
+          <div class="relative w-full sm:max-w-md">
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </span>
+            <input
+              id="search"
+              type="search"
+              placeholder="Buscar por placa o cliente…"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none ring-orange-500/30 focus:border-orange-400 focus:ring-2"
+            />
+          </div>
+        </div>
+      </header>
+
+      <main class="p-4 sm:p-6">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Clientes totales</p>
+            <p id="kpi-clients" class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">—</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Vehículos en taller</p>
+            <p id="kpi-vehicles" class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">—</p>
+            <p class="mt-1 text-[10px] leading-tight text-slate-400 sm:text-xs">En proceso (recibido / diagnóstico / reparando)</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Órdenes pendientes</p>
+            <p id="kpi-pending" class="mt-2 text-2xl font-bold text-orange-600 sm:text-3xl">—</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Ventas del mes</p>
+            <p id="kpi-sales" class="mt-2 text-2xl font-bold text-emerald-600 sm:text-3xl">—</p>
+            <p class="mt-1 text-xs text-slate-400">Suma órdenes (total_cost)</p>
+          </article>
+        </div>
+
+        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Vista de patios</h2>
+        <div
+          id="kanban"
+          class="mt-4 flex gap-3 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0"
+        >
+          <!-- columnas inyectadas por JS -->
+        </div>
+        <p id="mock-banner" class="mt-4 hidden rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"></p>
+        <p id="load-err" class="mt-4 hidden rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700"></p>
+      </main>
+    </div>
+
+    <script type="module">
+      import { guardDashboard, subscribeAuthRedirect, logout, loadOwnerTenantData } from '/shared/js/auth.js';
+
+      const COLUMNS = [
+        { key: 'RECEIVED', label: 'Recibido', dot: 'bg-slate-500' },
+        { key: 'DIAGNOSING', label: 'En diagnóstico', dot: 'bg-violet-500' },
+        { key: 'REPAIRING', label: 'Reparando', dot: 'bg-orange-500' },
+        { key: 'READY', label: 'Listo', dot: 'bg-green-500' },
+      ];
+
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+      document.getElementById('btn-menu').addEventListener('click', openSidebar);
+      backdrop.addEventListener('click', closeSidebar);
+      document.getElementById('btn-logout').addEventListener('click', () => logout());
+
+      const ctx = await guardDashboard({ allowedRoles: ['OWNER'] });
+      if (!ctx) {
+        /* Redirección en curso */
+      } else {
+      subscribeAuthRedirect(ctx.supabase);
+
+      const pack = await loadOwnerTenantData(ctx.accessToken);
+      if (!pack) {
+        /* logout por 401 */
+      } else {
+
+      let clients = pack.clients || [];
+      let vehicles = pack.vehicles || [];
+      let orders = pack.orders || [];
+
+      if (pack.mock) {
+        const b = document.getElementById('mock-banner');
+        b.textContent =
+          'No se pudo conectar con la API o no hay datos. Mostrando KPIs y tablero en modo demostración (vacío).';
+        b.classList.remove('hidden');
+      }
+      if (pack.error && !pack.mock) {
+        document.getElementById('load-err').textContent = pack.error.message || 'Error cargando datos';
+        document.getElementById('load-err').classList.remove('hidden');
+      }
+
+      const clientById = Object.fromEntries(clients.map((c) => [c.id, c]));
+      const vehicleById = Object.fromEntries(vehicles.map((v) => [v.id, v]));
+
+      const now = new Date();
+      const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthSales = orders
+        .filter((o) => o.created_at && o.created_at.slice(0, 7) === ym)
+        .reduce((s, o) => s + Number(o.total_cost || 0), 0);
+
+      const pending = orders.filter((o) => o.status !== 'READY').length;
+
+      const inProcessStatuses = ['RECEIVED', 'DIAGNOSING', 'REPAIRING'];
+      const vehiclesInProcess = new Set(
+        orders.filter((o) => inProcessStatuses.includes(o.status)).map((o) => o.vehicle_id),
+      ).size;
+
+      document.getElementById('kpi-clients').textContent = clients.length;
+      document.getElementById('kpi-vehicles').textContent = vehiclesInProcess;
+      document.getElementById('kpi-pending').textContent = pending;
+      document.getElementById('kpi-sales').textContent = new Intl.NumberFormat('es-VE', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }).format(monthSales);
+
+      const kanbanEl = document.getElementById('kanban');
+
+      function cardHtml(o) {
+        const v = vehicleById[o.vehicle_id];
+        const plate = v ? v.plate : o.vehicle_id?.slice(0, 8) || '—';
+        const c = v ? clientById[v.client_id] : null;
+        const clientName = c ? c.name : 'Cliente';
+        const searchBlob = `${plate} ${clientName}`.toLowerCase();
+        return `
+          <div class="kanban-card mb-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm" data-search="${searchBlob}">
+            <p class="font-mono text-sm font-bold text-slate-900">${plate}</p>
+            <p class="text-xs text-slate-600">${clientName}</p>
+            <p class="mt-1 line-clamp-2 text-xs text-slate-500">${o.description || 'Sin descripción'}</p>
+          </div>`;
+      }
+
+      function renderKanban(filterText) {
+        const q = (filterText || '').trim().toLowerCase();
+        kanbanEl.innerHTML = COLUMNS.map((col) => {
+          const colOrders = orders.filter((o) => o.status === col.key);
+          const cards = colOrders
+            .map(cardHtml)
+            .join('');
+          return `
+            <div class="kanban-column flex min-w-[260px] flex-1 flex-col rounded-2xl border border-slate-200 bg-slate-50/80 lg:min-w-0">
+              <div class="flex items-center gap-2 border-b border-slate-200 px-3 py-2">
+                <span class="h-2 w-2 rounded-full ${col.dot}"></span>
+                <span class="text-sm font-semibold text-slate-800">${col.label}</span>
+                <span class="ml-auto rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-600">${colOrders.length}</span>
+              </div>
+              <div class="flex-1 overflow-y-auto p-2 max-h-[60vh] lg:max-h-[calc(100vh-320px)]">
+                ${cards || '<p class="p-2 text-xs text-slate-400">Sin órdenes</p>'}
+              </div>
+            </div>`;
+        }).join('');
+
+        kanbanEl.querySelectorAll('.kanban-card').forEach((el) => {
+          const blob = el.getAttribute('data-search') || '';
+          el.classList.toggle('hidden', q.length > 0 && !blob.includes(q));
+        });
+      }
+
+      renderKanban('');
+      document.getElementById('search').addEventListener('input', (e) => renderKanban(e.target.value));
+      }
+      }
+    </script>
+  </body>
+</html>

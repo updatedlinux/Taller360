@@ -2,76 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Taller360 — Mi taller</title>
+    <meta http-equiv="refresh" content="0;url=/taller/dashboard.html" />
+    <title>Redirigiendo…</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/shared/app-config.js"></script>
   </head>
-  <body class="min-h-screen bg-zinc-950 text-zinc-100 antialiased">
-    <header class="border-b border-orange-900/40 bg-zinc-900/90 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-orange-400">Portal taller</p>
-          <h1 class="text-lg font-bold text-white">Operaciones</h1>
-        </div>
-        <button id="btn-out" type="button" class="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800">Salir</button>
-      </div>
-    </header>
-    <main class="mx-auto grid max-w-6xl gap-10 px-6 py-10 lg:grid-cols-2">
-      <section>
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-orange-300/80">Clientes</h2>
-        <ul id="clients" class="mt-3 space-y-2 text-sm"></ul>
-      </section>
-      <section>
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-orange-300/80">Vehículos</h2>
-        <ul id="vehicles" class="mt-3 space-y-2 text-sm"></ul>
-      </section>
-    </main>
-    <script type="module">
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-      const cfg = window.TALLER360;
-      const key = cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY;
-      const supabase = createClient(cfg.SUPABASE_URL, key);
-
-      async function guard() {
-        const { data: s } = await supabase.auth.getSession();
-        if (!s.session) {
-          window.location.href = '/login.html';
-          return null;
-        }
-        const { data: profile } = await supabase.from('profiles').select('role').single();
-        if (profile?.role !== 'OWNER') {
-          window.location.href = '/login.html';
-          return null;
-        }
-        return s.session.access_token;
-      }
-
-      async function api(path, token) {
-        const res = await fetch(`${cfg.API_BASE}${path}`, { headers: { Authorization: `Bearer ${token}` } });
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error || res.statusText);
-        return j;
-      }
-
-      document.getElementById('btn-out').addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/login.html';
-      });
-
-      const token = await guard();
-      if (!token) throw new Error('no session');
-
-      const c = await api('/api/taller/clients', token);
-      document.getElementById('clients').innerHTML = (c.data || [])
-        .map((x) => `<li class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">${x.name} <span class="text-zinc-500">${x.email || ''}</span></li>`)
-        .join('') || '<li class="text-zinc-500">Sin clientes</li>';
-
-      const v = await api('/api/taller/vehicles', token);
-      document.getElementById('vehicles').innerHTML = (v.data || [])
-        .map((x) => `<li class="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">${x.plate} · ${x.brand || ''} ${x.model || ''}</li>`)
-        .join('') || '<li class="text-zinc-500">Sin vehículos</li>';
-    </script>
+  <body class="bg-slate-950 p-6 text-slate-400">
+    <a href="/taller/dashboard.html" class="text-orange-400">Ir al dashboard del taller</a>
   </body>
 </html>

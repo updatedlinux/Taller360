@@ -3,52 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Taller360 — Historial</title>
+    <title>Historial de órdenes — Taller360</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/shared/app-config.js"></script>
   </head>
-  <body class="min-h-screen bg-sky-50 text-slate-900 antialiased">
-    <header class="border-b border-sky-100 bg-white">
-      <div class="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-        <a href="/cliente/index.html" class="text-sm font-medium text-sky-700 hover:text-sky-900">← Volver</a>
+  <body class="min-h-screen bg-gradient-to-b from-sky-50 to-white text-slate-900 antialiased">
+    <header class="sticky top-0 border-b border-sky-100 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-lg items-center px-4 py-3 sm:max-w-2xl">
+        <a href="/cliente/dashboard.html" class="text-sm font-medium text-sky-700 hover:text-sky-900">← Volver</a>
       </div>
     </header>
-    <main class="mx-auto max-w-3xl px-6 py-8">
-      <h1 class="text-xl font-bold">Órdenes de servicio</h1>
-      <ul id="orders" class="mt-4 space-y-2"></ul>
+    <main class="mx-auto max-w-lg px-4 py-6 sm:max-w-2xl">
+      <h1 class="text-xl font-bold text-slate-900">Órdenes de servicio</h1>
+      <ul id="orders" class="mt-4 space-y-3"></ul>
     </main>
     <script type="module">
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+      import { apiJson } from '/shared/js/api.js';
+      import { guardDashboard, subscribeAuthRedirect, logout } from '/shared/js/auth.js';
 
-      const cfg = window.TALLER360;
-      const key = cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY;
-      const supabase = createClient(cfg.SUPABASE_URL, key);
       const params = new URLSearchParams(window.location.search);
       const vehicleId = params.get('id');
-
-      const { data: s } = await supabase.auth.getSession();
-      if (!s.session || !vehicleId) {
-        window.location.href = '/login.html';
+      if (!vehicleId) {
+        window.location.replace('/cliente/dashboard.html');
         throw new Error('abort');
       }
 
-      const res = await fetch(`${cfg.API_BASE}/api/cliente/vehicles/${vehicleId}/work-orders`, {
-        headers: { Authorization: `Bearer ${s.session.access_token}` },
-      });
-      const j = await res.json();
-      if (!res.ok) {
-        document.getElementById('orders').innerHTML = `<li class="text-rose-600">${j.error}</li>`;
-      } else {
-        document.getElementById('orders').innerHTML = (j.data || [])
-          .map(
-            (o) => `
-          <li class="rounded-lg border border-sky-100 bg-white p-4 shadow-sm">
-            <p class="font-medium">${o.status}</p>
+      const ctx = await guardDashboard({ allowedRoles: ['CLIENT'] });
+      if (!ctx) {
+        throw new Error('abort');
+      }
+      subscribeAuthRedirect(ctx.supabase);
+
+      try {
+        const j = await apiJson(`/api/cliente/vehicles/${vehicleId}/work-orders`, ctx.accessToken);
+        const list = j.data || [];
+        document.getElementById('orders').innerHTML = list.length
+          ? list
+              .map(
+                (o) => `
+          <li class="rounded-xl border border-sky-100 bg-white p-4 shadow-sm">
+            <p class="font-semibold text-sky-900">${o.status}</p>
             <p class="text-sm text-slate-600">${o.description || '—'}</p>
-            <p class="mt-1 text-xs text-slate-400">${new Date(o.created_at).toLocaleString()}</p>
+            <p class="mt-2 text-xs text-slate-400">${new Date(o.created_at).toLocaleString('es')}</p>
           </li>`,
-          )
-          .join('');
+              )
+              .join('')
+          : '<li class="rounded-xl border border-sky-100 bg-white p-6 text-center text-slate-500">Sin órdenes.</li>';
+      } catch (e) {
+        if (e.status === 401) {
+          await logout();
+          return;
+        }
+        document.getElementById('orders').innerHTML = `<li class="text-rose-600">${e.message}</li>`;
       }
     </script>
   </body>

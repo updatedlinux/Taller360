@@ -2,113 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Taller360 — SuperAdmin</title>
+    <meta http-equiv="refresh" content="0;url=/admin/dashboard.html" />
+    <title>Redirigiendo…</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/shared/app-config.js"></script>
   </head>
-  <body class="min-h-screen bg-slate-900 text-slate-100 antialiased">
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Portal</p>
-          <h1 class="text-lg font-bold text-white">SuperAdmin · Taller360</h1>
-        </div>
-        <button id="btn-out" type="button" class="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800">
-          Salir
-        </button>
-      </div>
-    </header>
-    <main class="mx-auto max-w-6xl px-6 py-10">
-      <section class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded-xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm text-slate-400">Talleres totales</p>
-          <p id="k-total" class="mt-2 text-3xl font-bold text-white">—</p>
-        </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-950 p-6">
-          <p class="text-sm text-slate-400">Talleres activos</p>
-          <p id="k-active" class="mt-2 text-3xl font-bold text-emerald-400">—</p>
-        </div>
-      </section>
-      <section class="mt-10">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Talleres</h2>
-        <div id="list" class="mt-4 space-y-2"></div>
-      </section>
-    </main>
-    <script type="module">
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-      const cfg = window.TALLER360;
-      const key = cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY;
-      const supabase = createClient(cfg.SUPABASE_URL, key);
-
-      async function guard() {
-        const { data: s } = await supabase.auth.getSession();
-        if (!s.session) {
-          window.location.href = '/login.html';
-          return null;
-        }
-        const { data: profile } = await supabase.from('profiles').select('role').single();
-        if (profile?.role !== 'SUPERADMIN') {
-          window.location.href = '/login.html';
-          return null;
-        }
-        return s.session.access_token;
-      }
-
-      async function api(path, token, opts = {}) {
-        const res = await fetch(`${cfg.API_BASE}${path}`, {
-          ...opts,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            ...opts.headers,
-          },
-        });
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error || res.statusText);
-        return j;
-      }
-
-      document.getElementById('btn-out').addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/login.html';
-      });
-
-      const token = await guard();
-      if (!token) throw new Error('no session');
-
-      const dash = await api('/api/admin/dashboard', token);
-      document.getElementById('k-total').textContent = dash.data.tenantsTotal;
-      document.getElementById('k-active').textContent = dash.data.tenantsActive;
-
-      const tenants = await api('/api/admin/tenants', token);
-      const list = document.getElementById('list');
-      list.innerHTML = (tenants.data || [])
-        .map(
-          (t) => `
-        <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-3">
-          <div>
-            <p class="font-medium text-white">${t.name}</p>
-            <p class="text-xs text-slate-500">${t.plan} · ${t.status}</p>
-          </div>
-          <div class="flex gap-2">
-            <button data-id="${t.id}" data-next="${t.status === 'active' ? 'suspended' : 'active'}" class="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200 hover:bg-slate-700">
-              ${t.status === 'active' ? 'Suspender' : 'Activar'}
-            </button>
-          </div>
-        </div>`,
-        )
-        .join('');
-
-      list.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button[data-id]');
-        if (!btn) return;
-        const id = btn.getAttribute('data-id');
-        const status = btn.getAttribute('data-next');
-        await api(`/api/admin/tenants/${id}`, token, { method: 'PATCH', body: JSON.stringify({ status }) });
-        window.location.reload();
-      });
-    </script>
+  <body class="bg-slate-950 p-6 text-slate-400">
+    <a href="/admin/dashboard.html" class="text-indigo-400">Ir al panel SuperAdmin</a>
   </body>
 </html>

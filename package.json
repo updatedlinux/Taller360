@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "start": "node backend/src/app.js",
-    "dev": "node --watch backend/src/app.js"
+    "dev": "node --watch backend/src/app.js",
+    "demo:users": "node scripts/create-demo-users.js"
   },
   "engines": {
     "node": ">=18"

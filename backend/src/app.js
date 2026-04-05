@@ -31,7 +31,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.redirect('/login.html');
+  res.redirect('/auth/login.html');
 });
 
 app.use('/api/auth', authRoutes);

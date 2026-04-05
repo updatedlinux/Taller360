@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi cuenta — Taller360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/shared/app-config.js"></script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-sky-50 to-white text-slate-800 antialiased">
+    <header class="sticky top-0 z-10 border-b border-sky-100 bg-white/90 shadow-sm backdrop-blur">
+      <div class="mx-auto flex max-w-lg items-center justify-between px-4 py-3 sm:max-w-2xl">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-sky-600">Cliente</p>
+          <h1 class="text-lg font-bold text-slate-900">Mis vehículos</h1>
+          <p id="client-greeting" class="mt-0.5 text-sm text-slate-600"></p>
+        </div>
+        <button type="button" id="btn-out" class="text-sm font-medium text-sky-700 hover:text-sky-900">Salir</button>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-lg px-4 py-6 sm:max-w-2xl">
+      <p id="err" class="mb-4 hidden rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"></p>
+      <div id="vehicles-root" class="space-y-6"></div>
+    </main>
+
+    <script type="module">
+      import { apiJson } from '/shared/js/api.js';
+      import { guardDashboard, subscribeAuthRedirect, logout, loadClientPortalData } from '/shared/js/auth.js';
+
+      document.getElementById('btn-out').addEventListener('click', () => logout());
+
+      const ctx = await guardDashboard({ allowedRoles: ['CLIENT'] });
+      const root = document.getElementById('vehicles-root');
+      const errEl = document.getElementById('err');
+
+      if (!ctx) {
+        /* redirigido */
+      } else {
+      subscribeAuthRedirect(ctx.supabase);
+
+      let clientPayload;
+      try {
+        clientPayload = await loadClientPortalData(ctx);
+      } catch (e) {
+        errEl.textContent = e.message || 'Error al cargar';
+        errEl.classList.remove('hidden');
+      }
+      if (!clientPayload) {
+        /* logout o error ya mostrado */
+      } else {
+      const greet = document.getElementById('client-greeting');
+      if (clientPayload.clientRow) {
+        greet.textContent = clientPayload.clientRow.name
+          ? `Hola, ${clientPayload.clientRow.name}`
+          : '';
+      }
+
+      const MS_DAY = 86400000;
+      const MAINTENANCE_DAYS = 180;
+
+      function healthDot(lastServiceDate) {
+        if (!lastServiceDate) {
+          return { cls: 'bg-amber-400', label: 'Sin historial reciente' };
+        }
+        const days = (Date.now() - new Date(lastServiceDate).getTime()) / MS_DAY;
+        if (days > MAINTENANCE_DAYS) {
+          return { cls: 'bg-red-500', label: 'Revisión sugerida (+' + Math.floor(days) + ' días)' };
+        }
+        return { cls: 'bg-emerald-500', label: 'Al día' };
+      }
+
+      try {
+        const vehicles = clientPayload.vehicles || [];
+
+        if (vehicles.length === 0) {
+          root.innerHTML =
+            '<p class="rounded-2xl border border-sky-100 bg-white p-6 text-center text-slate-500 shadow-sm">No hay vehículos vinculados a su cuenta.</p>';
+          throw new Error('done');
+        }
+
+        for (const v of vehicles) {
+          let orders = [];
+          try {
+            const ro = await apiJson(`/api/cliente/vehicles/${v.id}/work-orders`, ctx.accessToken);
+            orders = ro.data || [];
+          } catch {
+            orders = [];
+          }
+          orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          const lastService = orders[0]?.created_at || null;
+          const dot = healthDot(lastService);
+
+          const thumbs = (v.photoUrls || []).filter((x) => x.signedUrl).slice(0, 3);
+          const imgs = thumbs
+            .map((x) => `<img src="${x.signedUrl}" alt="" class="h-20 w-full rounded-lg object-cover ring-1 ring-sky-100" loading="lazy" />`)
+            .join('');
+
+          const timeline =
+            orders.length === 0
+              ? '<p class="text-xs text-slate-400">Sin servicios registrados.</p>'
+              : `<ul class="relative border-l-2 border-sky-200 pl-4">
+            ${orders
+              .slice(0, 8)
+              .map((o) => {
+                const d = new Date(o.created_at);
+                const ds = d.toLocaleDateString('es', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const title = o.description || o.status || 'Servicio';
+                return `<li class="mb-4 ml-1">
+                  <span class="absolute -left-[9px] mt-1.5 h-3 w-3 rounded-full border-2 border-white bg-sky-500"></span>
+                  <p class="text-xs font-semibold text-sky-800">${ds}</p>
+                  <p class="text-sm text-slate-700">${title}</p>
+                  <p class="text-xs text-slate-500">${o.status}</p>
+                </li>`;
+              })
+              .join('')}
+          </ul>`;
+
+          root.insertAdjacentHTML(
+            'beforeend',
+            `<article class="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-md shadow-sky-100/50">
+              <div class="grid grid-cols-3 gap-1 bg-sky-50/80 p-2">
+                ${imgs || '<div class="col-span-3 flex h-24 items-center justify-center text-xs text-slate-400">Sin fotos</div>'}
+              </div>
+              <div class="p-4">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <p class="font-mono text-lg font-bold text-slate-900">${v.plate}</p>
+                    <p class="text-sm text-slate-600">${v.brand || ''} ${v.model || ''} ${v.year || ''}</p>
+                  </div>
+                  <div class="flex flex-col items-end gap-1">
+                    <span class="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                      <span class="h-2.5 w-2.5 rounded-full ${dot.cls}" title="${dot.label}"></span>
+                      ${dot.label}
+                    </span>
+                  </div>
+                </div>
+                <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-sky-600">Historial / salud</h3>
+                <div class="mt-2 max-h-64 overflow-y-auto pr-1">${timeline}</div>
+                <a href="/cliente/vehiculo.html?id=${v.id}" class="mt-4 inline-block text-sm font-medium text-sky-700 hover:underline">Ver detalle de órdenes</a>
+              </div>
+            </article>`,
+          );
+        }
+      } catch (e) {
+        if (e.message !== 'done') {
+          errEl.textContent = e.message || 'Error al cargar';
+          errEl.classList.remove('hidden');
+        }
+      }
+      }
+      }
+    </script>
+  </body>
+</html>

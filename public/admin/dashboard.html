@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SuperAdmin — Taller360 · Arsys Intela</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="/shared/app-config.js"></script>
+    <style>
+      body { font-family: 'DM Sans', system-ui, sans-serif; }
+      .bar { transition: height 0.4s ease; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+    <header class="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Arsys Intela</p>
+          <h1 class="text-lg font-bold text-white">SuperAdmin</h1>
+        </div>
+        <button type="button" id="btn-out" class="rounded-lg border border-slate-600 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800">Salir</button>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6">
+      <p id="err" class="hidden rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"></p>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Resumen</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p class="text-sm text-slate-400">Talleres activos</p>
+            <div class="mt-4 flex items-end gap-2">
+              <div id="chart-active" class="bar flex w-8 items-end justify-center rounded-t bg-indigo-500" style="height: 8px"></div>
+              <div id="chart-total" class="bar flex w-8 items-end justify-center rounded-t bg-slate-600" style="height: 8px"></div>
+            </div>
+            <div class="mt-2 flex gap-6 text-xs text-slate-500">
+              <span><span class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span> Activos: <strong id="n-active" class="text-white">—</strong></span>
+              <span><span class="inline-block h-2 w-2 rounded-full bg-slate-600"></span> Total: <strong id="n-total" class="text-white">—</strong></span>
+            </div>
+          </div>
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+            <p class="text-sm text-slate-400">Ingresos suscripción (estimado)</p>
+            <p class="mt-2 text-2xl font-bold text-emerald-400" id="revenue-mock">—</p>
+            <p class="mt-1 text-xs text-slate-500">Placeholder: <span id="plan-pro">0</span> talleres plan pro × tarifa mensual simulada.</p>
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-800">
+              <div id="rev-bar" class="h-full w-0 rounded-full bg-emerald-500 transition-all duration-500"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Tenants</h2>
+        <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
+          <table class="w-full min-w-[640px] text-left text-sm">
+            <thead class="border-b border-slate-800 text-xs uppercase text-slate-500">
+              <tr>
+                <th class="px-4 py-3">Nombre</th>
+                <th class="px-4 py-3">Plan</th>
+                <th class="px-4 py-3">Estado</th>
+                <th class="px-4 py-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiJson } from '/shared/js/api.js';
+      import { guardDashboard, subscribeAuthRedirect, logout, loadSuperAdminData } from '/shared/js/auth.js';
+
+      document.getElementById('btn-out').addEventListener('click', () => logout());
+
+      const ctx = await guardDashboard({ allowedRoles: ['SUPERADMIN'] });
+      const errEl = document.getElementById('err');
+
+      if (ctx) {
+      subscribeAuthRedirect(ctx.supabase);
+
+      try {
+        const loaded = await loadSuperAdminData(ctx.accessToken);
+        if (!loaded) {
+          throw new Error('Sesión finalizada');
+        }
+        const dash = { data: loaded.dashboard };
+        const total = dash.data.tenantsTotal || 0;
+        const active = dash.data.tenantsActive || 0;
+        document.getElementById('n-total').textContent = total;
+        document.getElementById('n-active').textContent = active;
+        const max = Math.max(total, 1);
+        document.getElementById('chart-total').style.height = `${8 + (total / max) * 80}px`;
+        document.getElementById('chart-active').style.height = `${8 + (active / max) * 80}px`;
+
+        const list = loaded.tenants || [];
+        const pro = list.filter((t) => t.plan === 'pro').length;
+        document.getElementById('plan-pro').textContent = pro;
+        const mockFee = 49;
+        const revenue = pro * mockFee;
+        document.getElementById('revenue-mock').textContent = new Intl.NumberFormat('es-VE', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(revenue);
+        document.getElementById('rev-bar').style.width = `${Math.min(100, pro * 20)}%`;
+
+        const tb = document.getElementById('tbody');
+        tb.innerHTML = list
+          .map(
+            (t) => `
+          <tr class="border-b border-slate-800/80 hover:bg-slate-800/30">
+            <td class="px-4 py-3 font-medium text-white">${t.name}</td>
+            <td class="px-4 py-3 text-slate-300">${t.plan}</td>
+            <td class="px-4 py-3">
+              <span class="rounded-full px-2 py-0.5 text-xs ${t.status === 'active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-200'}">${t.status}</span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              ${
+                t.status === 'active'
+                  ? `<button type="button" data-id="${t.id}" data-action="suspend" class="rounded-lg bg-amber-600/90 px-3 py-1 text-xs font-medium text-white hover:bg-amber-500">Suspender</button>`
+                  : `<button type="button" data-id="${t.id}" data-action="activate" class="rounded-lg bg-emerald-600/90 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-500">Activar</button>`
+              }
+            </td>
+          </tr>`,
+          )
+          .join('');
+
+        tb.addEventListener('click', async (e) => {
+          const btn = e.target.closest('button[data-id]');
+          if (!btn) return;
+          const id = btn.getAttribute('data-id');
+          const action = btn.getAttribute('data-action');
+          const status = action === 'suspend' ? 'suspended' : 'active';
+          try {
+            await apiJson(`/api/admin/tenants/${id}`, ctx.accessToken, { method: 'PATCH', body: { status } });
+            window.location.reload();
+          } catch (err) {
+            errEl.textContent = err.message;
+            errEl.classList.remove('hidden');
+          }
+        });
+      } catch (e) {
+        errEl.textContent = e.message || 'Error';
+        errEl.classList.remove('hidden');
+      }
+      }
+    </script>
+  </body>
+</html>
