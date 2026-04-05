@@ -22,15 +22,16 @@ export function getSupabase() {
   if (_client) {
     return _client;
   }
-  const cfg = window.TALLER360;
-  if (!cfg || !cfg.SUPABASE_URL) {
-    throw new Error('Configura SUPABASE_URL en /shared/app-config.js');
+  const cfg = typeof window !== 'undefined' ? window.TALLER360 : null;
+  const url = (cfg && cfg.SUPABASE_URL) || '';
+  const key = (cfg && (cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY)) || '';
+  if (!url) {
+    throw new Error('Configura SUPABASE_URL en /shared/js/config.js (y carga config.js antes del cliente Supabase).');
   }
-  const key = cfg.SUPABASE_KEY || cfg.SUPABASE_ANON_KEY;
   if (!key) {
-    throw new Error('Configura SUPABASE_KEY (clave publicable) en /shared/app-config.js');
+    throw new Error('Configura SUPABASE_KEY (clave publicable) en /shared/js/config.js.');
   }
-  if (looksLikePlaceholder(cfg.SUPABASE_URL, key)) {
+  if (looksLikePlaceholder(url, key)) {
     console.warn(
       '[Taller360] SUPABASE_URL o SUPABASE_KEY parecen placeholders; el login fallará hasta configurarlos.'
     );
@@ -38,14 +39,14 @@ export function getSupabase() {
   console.log('[Taller360 login] Creando cliente Supabase', {
     urlHost: (() => {
       try {
-        return new URL(cfg.SUPABASE_URL).host;
+        return new URL(url).host;
       } catch {
         return '(URL inválida)';
       }
     })(),
     keyLength: key.length,
   });
-  _client = createClient(cfg.SUPABASE_URL, key, {
+  _client = createClient(url, key, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,

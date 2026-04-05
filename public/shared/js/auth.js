@@ -41,7 +41,7 @@ export function mapLoginErrorMessage(error) {
     lower.includes('load failed') ||
     lower.includes('networkerror')
   ) {
-    return 'No pudimos conectar con el servicio de autenticación. Revisa SUPABASE_URL y la clave pública en app-config, tu red y la configuración del proyecto en Supabase.';
+    return 'No pudimos conectar con el servicio de autenticación. Revisa SUPABASE_URL y la clave pública en config.js, tu red y la configuración del proyecto en Supabase.';
   }
   return m;
 }
