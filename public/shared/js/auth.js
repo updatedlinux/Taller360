@@ -1,5 +1,4 @@
 import { getSupabase } from './supabase-client.js';
-import { apiJson } from './api.js';
 
 export const LOGIN_URL = '/auth/login.html';
 
@@ -19,10 +18,10 @@ export function getDashboardPathForRole(role) {
  * @param {{ message?: string; status?: number }} error
  */
 export function mapLoginErrorMessage(error) {
-  if (!error || !error.message) {
+  const m = error && (error.message || String(error));
+  if (!m) {
     return 'No pudimos iniciar sesión. Intenta de nuevo.';
   }
-  const m = error.message;
   const lower = m.toLowerCase();
   if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
     return 'Correo o contraseña incorrectos.';
@@ -35,6 +34,14 @@ export function mapLoginErrorMessage(error) {
   }
   if (lower.includes('network')) {
     return 'Error de red. Comprueba tu conexión.';
+  }
+  if (
+    lower.includes('failed to fetch') ||
+    lower === 'failed to fetch' ||
+    lower.includes('load failed') ||
+    lower.includes('networkerror')
+  ) {
+    return 'No pudimos conectar con el servicio de autenticación. Revisa SUPABASE_URL y la clave pública en app-config, tu red y la configuración del proyecto en Supabase.';
   }
   return m;
 }
@@ -126,10 +133,32 @@ export async function redirectIfAuthenticated() {
  * @returns {Promise<{ ok: true, redirect: string } | { ok: false, message: string }>}
  */
 export async function signInAndRedirectByRole(email, password) {
-  const supabase = getSupabase();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    return { ok: false, message: mapLoginErrorMessage(error) };
+  let supabase;
+  try {
+    supabase = getSupabase();
+  } catch (e) {
+    console.error('[Taller360 login] getSupabase falló', e);
+    return {
+      ok: false,
+      message: e && e.message ? e.message : 'No se pudo inicializar el cliente de autenticación.',
+    };
+  }
+
+  let signInResult;
+  try {
+    signInResult = await supabase.auth.signInWithPassword({ email, password });
+  } catch (e) {
+    console.error('[Taller360 login] signInWithPassword excepción', e);
+    return { ok: false, message: mapLoginErrorMessage(e) };
+  }
+
+  console.log('[Taller360 login] signInWithPassword respuesta', {
+    ok: !signInResult.error,
+    errorMessage: signInResult.error ? signInResult.error.message : null,
+  });
+
+  if (signInResult.error) {
+    return { ok: false, message: mapLoginErrorMessage(signInResult.error) };
   }
 
   const {
@@ -140,6 +169,12 @@ export async function signInAndRedirectByRole(email, password) {
   }
 
   const { profile, error: pErr } = await fetchMyProfile(supabase);
+  console.log('[Taller360 login] consulta profiles', {
+    hasProfile: !!profile,
+    profileRole: profile ? profile.role : null,
+    profileError: pErr ? pErr.message : null,
+  });
+
   if (pErr || !profile) {
     await supabase.auth.signOut();
     return { ok: false, message: PROFILE_MISSING_MESSAGE };
@@ -213,6 +248,7 @@ export function getOwnerDashboardMock() {
  * OWNER: clientes, vehículos y órdenes del tenant (API). Fallback mock.
  */
 export async function loadOwnerTenantData(accessToken) {
+  const { apiJson } = await import('./api.js');
   try {
     const [rc, rv, ro] = await Promise.all([
       apiJson('/api/taller/clients', accessToken),
@@ -238,6 +274,7 @@ export async function loadOwnerTenantData(accessToken) {
  * CLIENT: fila en public.clients + vehículos vía API.
  */
 export async function loadClientPortalData(ctx) {
+  const { apiJson } = await import('./api.js');
   if (!ctx.profile.client_id) {
     throw new Error('Tu perfil no está vinculado a un cliente del taller.');
   }
@@ -272,6 +309,7 @@ export async function loadClientPortalData(ctx) {
  * SUPERADMIN: resumen + lista global de tenants.
  */
 export async function loadSuperAdminData(accessToken) {
+  const { apiJson } = await import('./api.js');
   try {
     const dash = await apiJson('/api/admin/dashboard', accessToken);
     const tenants = await apiJson('/api/admin/tenants', accessToken);
