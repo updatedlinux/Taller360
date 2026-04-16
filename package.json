@@ -2,18 +2,13 @@
   "name": "taller360",
   "private": true,
   "scripts": {
-    "start": "node backend/src/app.js",
-    "dev": "node --watch backend/src/app.js",
-    "demo:users": "node scripts/create-demo-users.js"
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev",
+    "db:migrate": "npm --prefix backend run db:migrate",
+    "db:deploy": "npm --prefix backend run db:deploy",
+    "db:seed": "npm --prefix backend run db:seed"
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.47.10",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "multer": "^1.4.5-lts.1"
   }
 }

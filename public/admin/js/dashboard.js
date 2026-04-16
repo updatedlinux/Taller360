@@ -1,4 +1,5 @@
 import { guardDashboard, subscribeAuthRedirect, logout } from '/shared/js/auth.js';
+import { apiJson } from '/shared/js/api.js';
 import {
   renderSidebarNav,
   setupAdminChrome,
@@ -7,47 +8,7 @@ import {
   formatMoneyUSD,
   statusBadgeClass,
   statusLabel,
-  PLAN_FEES_USD,
 } from './admin-shared.js';
-
-async function loadMetrics(supabase) {
-  const totalQ = supabase.from('tenants').select('*', { count: 'exact', head: true });
-  const activeQ = supabase.from('tenants').select('*', { count: 'exact', head: true }).eq('status', 'active');
-  const profilesQ = supabase.from('profiles').select('*', { count: 'exact', head: true });
-  const activeRowsQ = supabase
-    .from('tenants')
-    .select('plan')
-    .eq('status', 'active');
-
-  const [totalR, activeR, profilesR, activeRowsR] = await Promise.all([totalQ, activeQ, profilesQ, activeRowsQ]);
-
-  if (totalR.error) throw totalR.error;
-  if (activeR.error) throw activeR.error;
-  if (profilesR.error) throw profilesR.error;
-  if (activeRowsR.error) throw activeRowsR.error;
-
-  const totalTenants = totalR.count ?? 0;
-  const activeTenants = activeR.count ?? 0;
-  const totalProfiles = profilesR.count ?? 0;
-
-  let mrr = 0;
-  for (const row of activeRowsR.data || []) {
-    const p = row.plan;
-    mrr += PLAN_FEES_USD[p] ?? 0;
-  }
-
-  return { totalTenants, activeTenants, totalProfiles, mrr };
-}
-
-async function loadRecentTenants(supabase) {
-  const { data, error } = await supabase
-    .from('tenants')
-    .select('id, name, rif, plan, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10);
-  if (error) throw error;
-  return data || [];
-}
 
 function renderRecentTable(rows) {
   const tb = document.getElementById('tbody-recent');
@@ -84,19 +45,20 @@ async function main() {
   document.getElementById('header-user-name').textContent = ctx.profile.full_name;
   setupAdminChrome();
   document.getElementById('btn-admin-logout')?.addEventListener('click', () => logout());
-  subscribeAuthRedirect(ctx.supabase);
+  subscribeAuthRedirect(null);
 
   const errEl = document.getElementById('err');
 
   try {
-    const m = await loadMetrics(ctx.supabase);
-    document.getElementById('metric-total-tenants').textContent = m.totalTenants;
-    document.getElementById('metric-active-tenants').textContent = m.activeTenants;
-    document.getElementById('metric-profiles').textContent = m.totalProfiles;
-    document.getElementById('metric-mrr').textContent = formatMoneyUSD(m.mrr);
+    const dash = await apiJson('/api/admin/dashboard', ctx.accessToken);
+    const m = dash.data || {};
+    document.getElementById('metric-total-tenants').textContent = m.tenantsTotal ?? '—';
+    document.getElementById('metric-active-tenants').textContent = m.tenantsActive ?? '—';
+    document.getElementById('metric-profiles').textContent = m.totalProfiles ?? '—';
+    document.getElementById('metric-mrr').textContent = formatMoneyUSD(m.mrr ?? 0);
 
-    const recent = await loadRecentTenants(ctx.supabase);
-    renderRecentTable(recent);
+    const recentJson = await apiJson('/api/admin/dashboard/recent-tenants', ctx.accessToken);
+    renderRecentTable(recentJson.data || []);
   } catch (e) {
     const msg = e?.message || 'Error al cargar el panel';
     if (errEl) {

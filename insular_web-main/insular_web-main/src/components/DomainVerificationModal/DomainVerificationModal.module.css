@@ -1,0 +1,38 @@
+.content {
+  max-width: 100%;
+  padding: var(--space-md) 0;
+}
+
+.content p {
+  color: var(--color-text-secondary);
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height: 1.6;
+  margin-bottom: var(--space-xl);
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-start;
+}
+
+.actions :global(.button) {
+  white-space: normal;
+  line-height: 1.3;
+  font-size: 0.85rem;
+  padding: 0.65rem 1rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actions :global(.button) {
+    width: 100%;
+    min-width: 100%;
+  }
+}

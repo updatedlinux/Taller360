@@ -1,0 +1,402 @@
+/* Knowledge Base Styles */
+
+.knowledgeBase {
+  min-height: 100vh;
+  background: var(--color-background);
+  padding-top: calc(var(--navbar-offset) + var(--space-2xl));
+  padding-bottom: var(--space-3xl);
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  margin-bottom: var(--space-3xl);
+  padding-bottom: var(--space-2xl);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.header h1 {
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+}
+
+.subtitle {
+  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.lastUpdated {
+  font-size: var(--body-xs);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+/* Sections */
+.section {
+  margin-bottom: var(--space-3xl);
+  padding-bottom: var(--space-2xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section h2 {
+  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xl);
+  font-family: var(--font-primary);
+}
+
+.section h3 {
+  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+}
+
+.section h4 {
+  font-size: clamp(1.0625rem, 1.2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.section p {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.section ul {
+  margin: var(--space-lg) 0;
+  padding-left: var(--space-xl);
+}
+
+.section li {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.section li::marker {
+  color: var(--color-accent);
+}
+
+.section strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.section a {
+  color: var(--color-red-electrica);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  font-weight: 500;
+}
+
+.section a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Subsections */
+.subsection {
+  margin-bottom: var(--space-2xl);
+}
+
+.subsection:last-child {
+  margin-bottom: 0;
+}
+
+/* Data List (for structured key-value pairs) */
+.dataList {
+  display: grid;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+}
+
+.dataList dt {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-primary);
+}
+
+.dataList dd {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-md);
+  margin-left: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.dataList dd:last-child {
+  margin-bottom: 0;
+}
+
+.dataList a {
+  color: var(--color-red-electrica);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  font-weight: 500;
+}
+
+.dataList a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Address */
+.address {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--color-accent);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: 0 var(--radius-button) var(--radius-button) 0;
+  margin: var(--space-lg) 0;
+  font-style: normal;
+}
+
+.address p {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.address p:last-child {
+  margin-bottom: 0;
+}
+
+.address strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Important Notice */
+.important {
+  background: rgba(249, 50, 67, 0.1);
+  border-left: 3px solid var(--color-alerta);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: 0 var(--radius-button) var(--radius-button) 0;
+  margin: var(--space-lg) 0;
+}
+
+.important p {
+  margin-bottom: 0;
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.important strong {
+  color: var(--color-alerta);
+}
+
+/* FAQ Items */
+.faqItem {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-button);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.faqItem:last-child {
+  margin-bottom: 0;
+}
+
+.faqItem h3 {
+  font-size: clamp(1.0625rem, 1.2vw, 1.25rem);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-top: 0;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.faqItem p {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 0;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+/* Contact Box */
+.contactBox {
+  background: rgba(66, 43, 226, 0.05);
+  border-left: 3px solid var(--color-accent);
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: 0 var(--radius-button) var(--radius-button) 0;
+  margin: var(--space-lg) 0;
+}
+
+.contactBox p {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.contactBox p:last-child {
+  margin-bottom: 0;
+}
+
+.contactBox strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.contactBox a {
+  color: var(--color-red-electrica);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  font-weight: 500;
+}
+
+.contactBox a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Quick Info Grid */
+.quickInfo {
+  margin: var(--space-xl) 0;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-lg);
+}
+
+.infoCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-button);
+  padding: var(--space-lg);
+}
+
+.infoCard h3 {
+  font-size: clamp(1.0625rem, 1.2vw, 1.25rem);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-top: 0;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.infoCard p {
+  font-size: clamp(0.875rem, 1vw, 1rem);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.infoCard p:last-child {
+  margin-bottom: 0;
+}
+
+.infoCard small {
+  font-size: var(--body-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Footer */
+.footer {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-2xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.footer p {
+  font-size: clamp(0.875rem, 1vw, 1rem);
+  color: var(--color-text-tertiary);
+  line-height: 1.7;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.footer p:last-child {
+  margin-bottom: 0;
+}
+
+.footer small {
+  font-size: var(--body-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .knowledgeBase {
+    padding-top: calc(var(--navbar-offset) + var(--space-xl));
+  }
+
+  .header {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-xl);
+  }
+
+  .section {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-xl);
+  }
+
+  .subsection {
+    margin-bottom: var(--space-xl);
+  }
+
+  .dataList dd {
+    margin-left: 0;
+  }
+
+  .faqItem {
+    padding: var(--space-md);
+  }
+
+  .contactBox,
+  .address,
+  .important {
+    padding: var(--space-md);
+  }
+}

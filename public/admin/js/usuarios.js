@@ -1,4 +1,5 @@
 import { guardDashboard, subscribeAuthRedirect, logout } from '/shared/js/auth.js';
+import { apiJson } from '/shared/js/api.js';
 import {
   renderSidebarNav,
   setupAdminChrome,
@@ -9,40 +10,14 @@ import {
 } from './admin-shared.js';
 
 let allRows = [];
-let rpcAvailable = true;
 
-async function loadProfiles(supabase) {
-  const rpc = await supabase.rpc('admin_profiles_list');
-  if (!rpc.error) {
-    rpcAvailable = true;
-    return Array.isArray(rpc.data) ? rpc.data : [];
-  }
-
-  rpcAvailable = false;
-  const fb = await supabase
-    .from('profiles')
-    .select('id, full_name, role, tenant_id, created_at, tenants(name)')
-    .order('created_at', { ascending: false });
-
-  if (fb.error) throw fb.error;
-  return (fb.data || []).map((p) => ({
-    id: p.id,
-    full_name: p.full_name,
-    role: p.role,
-    tenant_id: p.tenant_id,
-    tenant_name: p.tenants && p.tenants.name ? p.tenants.name : null,
-    email: '',
-    created_at: p.created_at,
-  }));
+async function loadProfiles(accessToken) {
+  const res = await apiJson('/api/admin/profiles', accessToken);
+  return Array.isArray(res.data) ? res.data : [];
 }
 
 function renderTable(filterRole) {
   const tb = document.getElementById('tbody-usuarios');
-  const hint = document.getElementById('email-hint');
-  if (hint) {
-    hint.classList.toggle('hidden', rpcAvailable);
-  }
-
   const rows = filterRole === 'all' ? allRows : allRows.filter((r) => r.role === filterRole);
 
   if (!rows.length) {
@@ -75,16 +50,13 @@ async function main() {
   document.getElementById('header-user-name').textContent = ctx.profile.full_name;
   setupAdminChrome();
   document.getElementById('btn-admin-logout')?.addEventListener('click', () => logout());
-  subscribeAuthRedirect(ctx.supabase);
+  subscribeAuthRedirect(null);
 
   const errEl = document.getElementById('err');
   const toast = document.getElementById('toast');
 
   try {
-    allRows = await loadProfiles(ctx.supabase);
-    document.getElementById('filter-role')?.addEventListener('change', (e) => {
-      renderTable(e.target.value);
-    });
+    allRows = await loadProfiles(ctx.accessToken);
     renderTable('all');
   } catch (e) {
     const msg = e?.message || 'Error al cargar usuarios';
@@ -94,6 +66,10 @@ async function main() {
     }
     showToast(toast, msg, 'error');
   }
+
+  document.getElementById('filter-role')?.addEventListener('change', (e) => {
+    renderTable(e.target.value);
+  });
 }
 
 main();

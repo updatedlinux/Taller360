@@ -1,67 +1,70 @@
-const { supabase, createUserClient } = require('../config/supabase');
+const { verifyAccessToken } = require('../services/authTokens.service');
+const { resolveClientIdForUser } = require('../services/userProfile.service');
+const { getPrisma } = require('../lib/prisma');
 const { httpError } = require('./errorHandler');
-const { assertNoAuthError } = require('../utils/supabaseHelpers');
+
+function getBearerOrCookie(req) {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    const t = header.slice(7).trim();
+    if (t) return t;
+  }
+  if (req.cookies && req.cookies.taller360_token) {
+    return String(req.cookies.taller360_token);
+  }
+  return null;
+}
 
 /**
- * Verifica Authorization: Bearer con supabase.auth.getUser(token).
- * Expone req.user (incl. tenant_id) y req.profile (mismo perfil, compatibilidad).
  * @type {import('express').RequestHandler}
  */
 async function requireAuth(req, res, next) {
   try {
-    const header = req.headers.authorization;
-    if (!header || !header.startsWith('Bearer ')) {
+    const token = getBearerOrCookie(req);
+    if (!token) {
       throw httpError(401, 'Token requerido');
     }
-    const token = header.slice(7).trim();
-    if (!token) {
-      throw httpError(401, 'Token vacío');
-    }
-
-    const userResult = await supabase.auth.getUser(token);
-    assertNoAuthError(userResult, 401);
-    const authUser = userResult.data.user;
-    if (!authUser) {
+    let decoded;
+    try {
+      decoded = verifyAccessToken(token);
+    } catch {
       throw httpError(401, 'Sesión inválida o expirada');
     }
+    const userId = decoded && decoded.sub;
+    if (!userId) {
+      throw httpError(401, 'Token inválido');
+    }
 
-    const sb = createUserClient(token);
-    const profileResult = await sb
-      .from('profiles')
-      .select('id, tenant_id, full_name, role, created_at')
-      .eq('id', authUser.id)
-      .maybeSingle();
-
-    if (profileResult.error || !profileResult.data) {
+    const prisma = getPrisma();
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
+    if (!user || !user.profile) {
       throw httpError(403, 'Perfil no encontrado. Contacte al administrador.');
     }
 
-    const p = profileResult.data;
-    let resolvedClientId = null;
-    if (p.role === 'CLIENT' && p.tenant_id && authUser.email) {
-      const email = String(authUser.email).trim();
-      const clientRes = await sb
-        .from('clients')
-        .select('id')
-        .eq('tenant_id', p.tenant_id)
-        .eq('email', email)
-        .maybeSingle();
-      if (!clientRes.error && clientRes.data) {
-        resolvedClientId = clientRes.data.id;
-      }
-    }
+    const emailNorm = String(user.email || '').trim().toLowerCase();
+    const clientId = await resolveClientIdForUser(
+      {
+        role: user.profile.role,
+        tenantId: user.profile.tenantId,
+        clientId: user.profile.clientId,
+      },
+      emailNorm,
+    );
 
     req.accessToken = token;
-    req.authUser = authUser;
-    req.profile = Object.assign({}, p, { client_id: resolvedClientId });
-    req.user = {
-      id: p.id,
-      tenant_id: p.tenant_id,
-      full_name: p.full_name,
-      role: p.role,
-      client_id: resolvedClientId,
+    req.authUser = { id: user.id, email: user.email };
+    req.profile = {
+      id: user.profile.id,
+      tenant_id: user.profile.tenantId,
+      full_name: user.profile.fullName,
+      role: user.profile.role,
+      client_id: clientId,
+      created_at: user.profile.createdAt,
     };
-    req.sb = sb;
+    req.user = Object.assign({}, req.profile);
     next();
   } catch (e) {
     next(e);
@@ -87,4 +90,4 @@ function requireRoles(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRoles };
+module.exports = { requireAuth, requireRoles, getBearerOrCookie };

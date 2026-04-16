@@ -1,0 +1,340 @@
+/* Aliados Page Styles */
+
+/* ===== HERO SECTION ===== */
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  background: var(--color-background);
+  padding-top: calc(var(--navbar-offset) + var(--container-padding));
+  padding-right: var(--container-padding);
+  padding-bottom: var(--container-padding);
+  padding-left: var(--container-padding);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  inset: var(--container-padding);
+  z-index: 0;
+  border-radius: 24px 0 24px 0;
+  border: var(--border-width-thin) solid var(--color-border-grey);
+  overflow: hidden;
+}
+
+.heroBackground::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(20, 16, 41, 0.95) 0%, rgba(20, 16, 41, 0.7) 50%, rgba(20, 16, 41, 0.4) 100%);
+  z-index: 1;
+}
+
+.heroBackground img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 24px 0 24px 0;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: var(--space-3xl) var(--container-padding);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.heroText {
+  max-width: 65%;
+}
+
+.heroText h1 {
+  font-size: clamp(2.5rem, 6vw, 6rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  letter-spacing: -0.01em;
+}
+
+.heroText p {
+  font-size: var(--body);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.heroActions {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+/* ===== GUARANTEE CTA SECTION ===== */
+.guaranteeCtaSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.guaranteeCtaCard {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
+  background: linear-gradient(135deg, rgba(66, 43, 226, 0.15) 0%, rgba(66, 43, 226, 0.05) 100%);
+  border: 1px solid rgba(66, 43, 226, 0.2);
+  border-radius: 24px 0 24px 0;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.guaranteeCtaCard:hover {
+  border-color: rgba(66, 43, 226, 0.3);
+  transform: translateY(-4px);
+  background: linear-gradient(135deg, rgba(66, 43, 226, 0.2) 0%, rgba(66, 43, 226, 0.08) 100%);
+}
+
+.guaranteeCtaCard h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+}
+
+.guaranteeSubtext {
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  margin-bottom: var(--space-lg);
+  font-family: var(--font-primary);
+}
+
+.guaranteeCtaCard .btn-wrapper {
+  display: inline-flex;
+  margin-top: var(--space-md);
+}
+
+/* ===== PARTNERS SECTION ===== */
+.partnersSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.partnerTabsWrapper {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.partnerTab {
+  all: unset;
+  padding: var(--space-sm) var(--space-xl);
+  background: rgba(66, 43, 226, 0.1);
+  border: 1px solid rgba(66, 43, 226, 0.2);
+  border-radius: var(--radius-button);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-size: var(--body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.partnerTab:hover {
+  background: rgba(66, 43, 226, 0.15);
+  border-color: rgba(66, 43, 226, 0.3);
+}
+
+.partnerTabActive {
+  background: var(--color-red-electrica);
+  border-color: var(--color-red-electrica);
+  color: var(--color-text-primary);
+}
+
+.partnerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.partnerHeader {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: clamp(2rem, 4vw, 3rem);
+  align-items: center;
+  margin-bottom: var(--space-2xl);
+  padding: clamp(2rem, 3vw, 2.5rem);
+  background: linear-gradient(135deg, rgba(66, 43, 226, 0.08) 0%, rgba(66, 43, 226, 0.02) 100%);
+  border: 1px solid rgba(66, 43, 226, 0.15);
+  border-radius: 24px 0 24px 0;
+}
+
+.partnerLogoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 3vw, 2.5rem);
+  background: transparent;
+  border: 2px solid rgba(66, 43, 226, 0.3);
+  border-radius: 24px 0 24px 0;
+  min-height: 180px;
+}
+
+.partnerLogo {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  /* Make colored logos appear white */
+  filter: brightness(0) invert(1);
+}
+
+.partnerInfo h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.partnerInfo p {
+  font-size: var(--body);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  font-family: var(--font-primary);
+  font-weight: 300;
+}
+
+.partnerIntro {
+  font-size: var(--body);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-lg);
+  font-family: var(--font-primary);
+  font-weight: 400;
+  text-align: center;
+}
+
+/* ===== COUNTRIES GRID ===== */
+.countriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.countryCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(66, 43, 226, 0.08);
+  border: 1px solid rgba(66, 43, 226, 0.2);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.countryCard:hover {
+  background: rgba(66, 43, 226, 0.12);
+  border-color: rgba(66, 43, 226, 0.3);
+  transform: translateY(-2px);
+}
+
+.countryFlag {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.countryCard .countryName {
+  font-size: var(--body-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-weight: 400;
+}
+
+.partnerOutro {
+  font-size: var(--body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-top: var(--space-xl);
+  font-family: var(--font-primary);
+  font-weight: 300;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Laptop screens */
+@media (max-width: 1024px) {
+  .partnerHeader {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    text-align: center;
+  }
+
+  .partnerLogoWrapper {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--space-lg) 0 var(--space-xl) 0;
+  }
+
+  .heroText {
+    max-width: 100%;
+  }
+
+  .guaranteeCtaSection,
+  .partnersSection {
+    padding: var(--space-xl) 0;
+  }
+
+  .guaranteeCtaCard {
+    padding: clamp(2rem, 4vw, 2.5rem) clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .partnerTabsWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+
+  .partnerTab {
+    width: 100%;
+    text-align: center;
+  }
+
+  .partnerHeader {
+    padding: var(--space-md);
+  }
+
+  .partnerLogoWrapper {
+    min-height: 140px;
+    padding: var(--space-md);
+  }
+
+  .countriesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--space-xs);
+  }
+
+  .countryCard {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .countryFlag {
+    font-size: 1.5rem;
+  }
+}

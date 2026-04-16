@@ -1,10 +1,7 @@
+const { getPrisma } = require('../lib/prisma');
 const { httpError } = require('../middlewares/errorHandler');
-const { assertNoDbError } = require('../utils/supabaseHelpers');
+const { clientOut } = require('../utils/dto');
 
-/**
- * @param {import('express').Request} req
- * @returns {string}
- */
 function tenantId(req) {
   const id = req.user && req.user.tenant_id;
   if (!id) {
@@ -13,77 +10,79 @@ function tenantId(req) {
   return id;
 }
 
-/**
- * GET /api/taller/clients
- */
 async function list(req, res) {
   const tid = tenantId(req);
-  const data = assertNoDbError(
-    await req.sb.from('clients').select('*').eq('tenant_id', tid).order('created_at', { ascending: false }),
-  );
-  res.json({ ok: true, data: data != null ? data : [] });
+  const prisma = getPrisma();
+  const rows = await prisma.client.findMany({
+    where: { tenantId: tid },
+    orderBy: { createdAt: 'desc' },
+  });
+  res.json({ ok: true, data: rows.map(clientOut) });
 }
 
-/**
- * GET /api/taller/clients/:id
- */
 async function getById(req, res) {
   const tid = tenantId(req);
-  const data = assertNoDbError(
-    await req.sb.from('clients').select('*').eq('id', req.params.id).eq('tenant_id', tid).single(),
-    { notFoundMessage: 'Cliente no encontrado en su taller' },
-  );
-  res.json({ ok: true, data });
+  const prisma = getPrisma();
+  const row = await prisma.client.findFirst({
+    where: { id: req.params.id, tenantId: tid },
+  });
+  if (!row) {
+    throw httpError(404, 'Cliente no encontrado en su taller');
+  }
+  res.json({ ok: true, data: clientOut(row) });
 }
 
-/**
- * POST /api/taller/clients
- */
 async function create(req, res) {
   const tid = tenantId(req);
   const { name, email, phone } = req.body || {};
   if (!name) {
     throw httpError(400, 'name es obligatorio');
   }
-  const data = assertNoDbError(
-    await req.sb
-      .from('clients')
-      .insert({ tenant_id: tid, name, email: email || null, phone: phone || null })
-      .select('*')
-      .single(),
-  );
-  res.status(201).json({ ok: true, data });
+  const prisma = getPrisma();
+  const row = await prisma.client.create({
+    data: {
+      tenantId: tid,
+      name,
+      email: email != null ? String(email).trim().toLowerCase() : null,
+      phone: phone || null,
+    },
+  });
+  res.status(201).json({ ok: true, data: clientOut(row) });
 }
 
-/**
- * PUT /api/taller/clients/:id
- */
 async function update(req, res) {
   const tid = tenantId(req);
   const { name, email, phone } = req.body || {};
   const patch = {};
   if (name !== undefined) patch.name = name;
-  if (email !== undefined) patch.email = email;
+  if (email !== undefined) patch.email = email != null ? String(email).trim().toLowerCase() : null;
   if (phone !== undefined) patch.phone = phone;
   if (Object.keys(patch).length === 0) {
     throw httpError(400, 'Nada que actualizar');
   }
-  const data = assertNoDbError(
-    await req.sb.from('clients').update(patch).eq('id', req.params.id).eq('tenant_id', tid).select('*').single(),
-    { notFoundMessage: 'Cliente no encontrado en su taller' },
-  );
-  res.json({ ok: true, data });
+  const prisma = getPrisma();
+  const row = await prisma.client.updateMany({
+    where: { id: req.params.id, tenantId: tid },
+    data: patch,
+  });
+  if (row.count === 0) {
+    throw httpError(404, 'Cliente no encontrado en su taller');
+  }
+  const updated = await prisma.client.findFirst({
+    where: { id: req.params.id, tenantId: tid },
+  });
+  res.json({ ok: true, data: clientOut(updated) });
 }
 
-/**
- * DELETE /api/taller/clients/:id
- */
 async function remove(req, res) {
   const tid = tenantId(req);
-  assertNoDbError(
-    await req.sb.from('clients').delete().eq('id', req.params.id).eq('tenant_id', tid).select('id').single(),
-    { notFoundMessage: 'Cliente no encontrado en su taller' },
-  );
+  const prisma = getPrisma();
+  const row = await prisma.client.deleteMany({
+    where: { id: req.params.id, tenantId: tid },
+  });
+  if (row.count === 0) {
+    throw httpError(404, 'Cliente no encontrado en su taller');
+  }
   res.status(204).send();
 }
 

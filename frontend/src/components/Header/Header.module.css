@@ -1,0 +1,456 @@
+/* Header Component Styles */
+
+.header {
+  position: fixed;
+  top: var(--container-padding);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--container-max);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0);
+  z-index: var(--z-sticky);
+  padding: 0;
+}
+
+.scrolled {
+  width: calc(100% - (var(--container-padding) * 2));
+  background: rgba(16, 16, 33, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--color-border-grey);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove default container side padding inside the scrolled header
+   so left spacing matches the top/bottom padding (var(--space-xs)). */
+.scrolled :global(.container) {
+  padding-left: var(--space-xs);
+  padding-right: calc(var(--space-xs) * 3);
+}
+
+/* Ensure full-width hero pages maintain same padding when scrolled */
+.scrolled.fullWidthHero :global(.container) {
+  padding-left: var(--space-xs);
+  padding-right: calc(var(--space-xs) * 3);
+}
+
+/* Full-width hero variant - double the left/right padding only on smaller screens */
+@media (max-width: 1680px) {
+  .fullWidthHero :global(.container) {
+    padding-left: calc(var(--container-padding) * 2);
+    padding-right: calc(var(--container-padding) * 2);
+  }
+
+  /* Scrolled full-width hero navbar maintains same padding on small screens */
+  .scrolled.fullWidthHero :global(.container) {
+    padding-left: var(--space-xs);
+    padding-right: calc(var(--space-xs) * 3);
+  }
+}
+
+.scrolled .logoImage {
+  height: clamp(3.125rem, 2.875rem + 1.25vw, 3.75rem); /* Slightly smaller when scrolled */
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0; /* horizontal padding comes from .container to match sections */
+  min-height: var(--navbar-height);
+}
+
+.scrolled .headerContent {
+  min-height: clamp(4.375rem, 4rem + 1.875vw, 5rem);
+  padding: var(--space-xs) 0; /* rely on container padding for horizontal spacing to prevent shift */
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.logoImage {
+  height: clamp(3.75rem, 3.438rem + 1.563vw, 4.5rem);
+  width: auto;
+  max-width: none;
+  display: block;
+}
+
+.logoImage:hover { transform: none; }
+
+.nav {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.navLink {
+  font-family: var(--font-brand);
+  font-size: var(--body-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 0.25rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  right: 50%;
+  height: 0.125rem;
+  background: var(--color-red-electrica);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.navLink:hover {
+  color: var(--color-red-electrica);
+  transform: translateY(-2px);
+}
+
+.navLink:hover::before {
+  left: 0;
+  right: 0;
+  opacity: 1;
+}
+
+.navLink.active {
+  color: var(--color-accent);
+}
+
+.navLink.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.125rem;
+  background: var(--color-accent);
+}
+
+/* Contacto button - red electrica outline style */
+.contactButton {
+  font-family: var(--font-brand);
+  font-size: var(--body-xs);
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-button);
+  border: 0.125rem solid var(--color-red-electrica);
+  color: var(--color-red-electrica);
+  background: transparent;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  transition: color 0.3s ease !important;
+}
+
+.contactButton::before {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  background-color: var(--color-red-electrica);
+  border-radius: 50%;
+  transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  z-index: -1;
+}
+
+.contactButton:hover {
+  color: var(--color-white);
+}
+
+.contactButton:hover::before {
+  width: 400%;
+  height: 400%;
+}
+
+/* Mobile full-width spacing */
+@media (max-width: 1080px) {
+  .contactButton {
+    width: calc(100% - (var(--container-padding) * 2));
+    padding: var(--space-sm);
+  }
+}
+
+.mobileToggle {
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.mobileToggle span {
+  display: block;
+  width: 1.5rem;
+  height: 0.125rem;
+  background: var(--color-white);
+  transition: all var(--transition-base);
+}
+
+/* Full-page Mobile Menu Overlay */
+.mobileMenuOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(16, 16, 33);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.mobileMenuOverlay.mobileMenuOpen {
+  visibility: visible;
+}
+
+.mobileMenuClose {
+  position: absolute;
+  top: clamp(1.5rem, 3vw, 2.5rem);
+  right: clamp(1.5rem, 3vw, 2.5rem);
+  background: transparent;
+  border: 2px solid var(--color-text-primary);
+  border-radius: 50%;
+  width: clamp(3rem, 5vw, 4rem);
+  height: clamp(3rem, 5vw, 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  will-change: transform, opacity;
+  padding: 0;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+}
+
+.mobileMenuClose:hover {
+  background: var(--color-red-electrica);
+  border-color: var(--color-red-electrica);
+  color: var(--color-white);
+  transform: rotate(90deg);
+}
+
+.mobileMenuGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+  height: 100vh;
+  height: 100dvh;
+  gap: 0;
+  overflow: hidden;
+}
+
+.mobileMenuImage {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-red-electrica), var(--color-firma-azul));
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.mobileMenuImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.85;
+}
+
+.mobileMenuNav {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(2rem, 5vw, 4rem);
+  gap: clamp(0.5rem, 2vh, 1.5rem);
+}
+
+.mobileMenuItem {
+  font-family: var(--font-primary);
+  font-size: clamp(2rem, 4vw + 2vh, 4.5rem);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  line-height: 1;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.mobileMenuItem:hover {
+  color: var(--color-text-primary);
+  transform: translateX(1rem);
+}
+
+.mobileMenuItemActive {
+  color: var(--color-red-electrica);
+}
+
+.mobileMenuFooter {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: clamp(2rem, 4vw, 3rem);
+  gap: clamp(1.5rem, 3vh, 2.5rem);
+}
+
+.mobileMenuSocial {
+  display: flex;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.mobileMenuSocial a {
+  width: clamp(2.5rem, 4vw, 3.5rem);
+  height: clamp(2.5rem, 4vw, 3.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileMenuSocial a:hover {
+  background: var(--color-red-electrica);
+  border-color: var(--color-red-electrica);
+  transform: translateY(-4px);
+}
+
+.mobileMenuSocial svg {
+  width: clamp(1.25rem, 2vw, 1.75rem);
+  height: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.mobileMenuLogo {
+  height: clamp(3rem, 5vw, 5rem);
+  width: auto;
+  opacity: 0.9;
+}
+
+/* Hide mobile menu overlay on desktop */
+@media (min-width: 1081px) {
+  .mobileMenuOverlay {
+    display: none;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 1080px) {
+  .headerContent {
+    min-height: clamp(5rem, 4.5rem + 2.5vw, 6rem);
+  }
+
+  .scrolled {
+    width: calc(100% - (var(--container-padding) * 2));
+    padding: 0;
+  }
+
+  .scrolled :global(.container) {
+    padding-left: var(--space-xs);
+    padding-right: calc(var(--space-xs) * 3);
+  }
+
+  .scrolled.fullWidthHero :global(.container) {
+    padding-left: var(--space-xs);
+    padding-right: calc(var(--space-xs) * 3);
+  }
+
+  .scrolled .headerContent {
+    min-height: clamp(3.75rem, 3.438rem + 1.563vw, 4.5rem);
+  }
+
+  .logoImage {
+    height: clamp(3.5rem, 3.188rem + 1.563vw, 4.25rem);
+  }
+
+  .scrolled .logoImage {
+    height: clamp(2.5rem, 2.25rem + 1.25vw, 3rem);
+  }
+
+  .mobileToggle {
+    display: flex;
+  }
+
+  .nav {
+    display: none;
+  }
+}
+
+/* Tablet and smaller - single column layout */
+@media (max-width: 768px) {
+  /* Smaller logo on mobile */
+  .logoImage {
+    height: clamp(2.75rem, 2.5rem + 1.25vw, 3.25rem);
+  }
+
+  .scrolled .logoImage {
+    height: clamp(2.25rem, 2rem + 1vw, 2.75rem);
+  }
+
+  .mobileMenuGrid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 40vh 1fr auto;
+  }
+
+  .mobileMenuImage {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .mobileMenuNav {
+    grid-column: 1;
+    grid-row: 2;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .mobileMenuItem {
+    font-size: clamp(1.75rem, 6vw, 3rem);
+  }
+
+  .mobileMenuFooter {
+    grid-column: 1;
+    grid-row: 3;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(1.5rem, 4vw, 2rem);
+  }
+}

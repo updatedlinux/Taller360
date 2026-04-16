@@ -1,0 +1,146 @@
+/* Marquee Section */
+.marqueeSection {
+  width: 100%;
+  padding: var(--space-xs) 0;
+}
+
+.marqueeTitle {
+  text-align: center;
+  font-size: var(--h3);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-primary);
+}
+
+/* Infinite Scroll Marquee */
+.marqueeWrapper {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  overflow: hidden;
+  padding: var(--space-sm) 0;
+  /* Ensure flex context isn't broken */
+  display: block;
+}
+
+/* Fade gradients on edges */
+.marqueeWrapper::before,
+.marqueeWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marqueeWrapper::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-background) 0%, rgba(16, 16, 33, 0) 100%);
+}
+
+.marqueeWrapper::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-background) 0%, rgba(16, 16, 33, 0) 100%);
+}
+
+.marquee {
+  display: flex !important;
+  flex-direction: row !important;
+  width: fit-content;
+  animation: scroll 30s linear infinite;
+  will-change: transform;
+  /* Debug: Make sure animation is running */
+  animation-play-state: running !important;
+}
+
+.marqueeWrapper:hover .marquee {
+  animation-play-state: paused;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.marqueeContent {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: clamp(3rem, 6vw, 6rem);
+  flex-shrink: 0;
+  padding-right: clamp(3rem, 6vw, 6rem);
+  align-items: center;
+  white-space: nowrap;
+  height: 3rem;
+}
+
+.countryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+  user-select: none;
+}
+
+.countryItem:hover {
+  opacity: 1;
+}
+
+.countryName {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  font-family: var(--font-primary);
+  letter-spacing: 0.05em;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Ensure marquee animation works */
+.marquee {
+  animation: scroll 30s linear infinite !important;
+  animation-fill-mode: none !important;
+  animation-play-state: running !important;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .marqueeSection {
+    padding: var(--space-xs) 0;
+  }
+
+  .marqueeTitle {
+    font-size: var(--h4);
+    margin-bottom: var(--space-xs);
+  }
+
+  .marqueeWrapper {
+    padding: var(--space-xs) 0;
+  }
+
+  .marqueeContent {
+    height: 2.5rem;
+    gap: clamp(2rem, 5vw, 3rem);
+    padding-right: clamp(2rem, 5vw, 3rem);
+  }
+
+  .countryName {
+    font-size: 1rem;
+  }
+
+  .marqueeWrapper::before,
+  .marqueeWrapper::after {
+    width: 100px;
+  }
+}

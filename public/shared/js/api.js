@@ -1,5 +1,5 @@
 /**
- * Peticiones a la API Express con Bearer (sesión Supabase).
+ * Peticiones a la API Express con Bearer y cookies (sesión on-premises).
  * @param {string} path
  * @param {string} accessToken
  * @param {RequestInit} [options]
@@ -13,7 +13,7 @@ export async function apiJson(path, accessToken, options = {}) {
     headers['Content-Type'] = 'application/json';
     body = JSON.stringify(body);
   }
-  const res = await fetch(url, Object.assign({}, options, { headers, body }));
+  const res = await fetch(url, Object.assign({}, options, { headers, body, credentials: 'include' }));
   const text = await res.text();
   let json = null;
   try {

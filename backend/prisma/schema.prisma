@@ -1,0 +1,111 @@
+// Taller360 — SQL Server (on-premises)
+// Evitamos rutas de CASCADE redundantes (requisito Prisma + SQL Server).
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  email        String   @unique @db.NVarChar(320)
+  passwordHash String   @map("password_hash") @db.NVarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  profile      Profile?
+  ownedTenants Tenant[] @relation("TenantOwner")
+}
+
+model Tenant {
+  id         String   @id @default(uuid()) @db.UniqueIdentifier
+  name       String   @db.NVarChar(500)
+  rif        String?  @db.NVarChar(100)
+  plan       String   @default("basic") @db.NVarChar(20)
+  status     String   @default("active") @db.NVarChar(20)
+  ownerId    String?  @map("owner_id") @db.UniqueIdentifier
+  owner      User?    @relation("TenantOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  phone      String?  @db.NVarChar(100)
+  address    String?  @db.NVarChar(1000)
+  ownerEmail String?  @map("owner_email") @db.NVarChar(320)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  clients   Client[]
+  profiles  Profile[]
+  inventory Inventory[]
+}
+
+model Client {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  tenantId  String   @map("tenant_id") @db.UniqueIdentifier
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String   @db.NVarChar(500)
+  email     String?  @db.NVarChar(320)
+  phone     String?  @db.NVarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  vehicles Vehicle[]
+  profiles Profile[]
+}
+
+model Profile {
+  id        String   @id @db.UniqueIdentifier
+  user      User     @relation(fields: [id], references: [id], onDelete: Cascade)
+  tenantId  String?  @map("tenant_id") @db.UniqueIdentifier
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  fullName  String   @map("full_name") @db.NVarChar(500)
+  role      String   @db.NVarChar(32)
+  clientId  String?  @map("client_id") @db.UniqueIdentifier
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model Vehicle {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  tenantId  String   @map("tenant_id") @db.UniqueIdentifier
+  clientId  String   @map("client_id") @db.UniqueIdentifier
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  plate     String   @db.NVarChar(50)
+  brand     String?  @db.NVarChar(200)
+  model     String?  @db.NVarChar(200)
+  year      Int?
+  km        Int?
+  /// JSON array de rutas relativas: tenantId/vehicleId/archivo
+  photos    String   @default("[]") @db.NVarChar(Max)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  workOrders WorkOrder[]
+
+  @@unique([tenantId, plate], name: "uq_vehicles_tenant_plate")
+  @@index([tenantId], map: "idx_vehicles_tenant")
+  @@map("vehicles")
+}
+
+model WorkOrder {
+  id          String   @id @default(uuid()) @db.UniqueIdentifier
+  tenantId    String   @map("tenant_id") @db.UniqueIdentifier
+  vehicleId   String   @map("vehicle_id") @db.UniqueIdentifier
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  status      String   @default("RECEIVED") @db.NVarChar(32)
+  description String?  @db.NVarChar(4000)
+  totalCost   Decimal  @default(0) @map("total_cost") @db.Decimal(14, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([tenantId], map: "idx_work_orders_tenant")
+  @@map("work_orders")
+}
+
+model Inventory {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  tenantId  String   @map("tenant_id") @db.UniqueIdentifier
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partName  String   @map("part_name") @db.NVarChar(500)
+  stock     Decimal  @default(0) @db.Decimal(14, 4)
+  price     Decimal  @default(0) @db.Decimal(14, 4)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("inventory")
+}

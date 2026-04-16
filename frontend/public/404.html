@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // SPA fallback for GoDaddy/Apache hosting
+      // Redirect to index.html while preserving the path
+      (function() {
+        var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
+        // Store the path in sessionStorage so the app can pick it up
+        sessionStorage.setItem('redirect_path', path + search + hash);
+        // Redirect to root
+        window.location.replace('/');
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>

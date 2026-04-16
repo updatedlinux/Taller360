@@ -1,0 +1,53 @@
+/* Carousel Component Styles */
+
+.carousel {
+  overflow: hidden;
+  position: relative;
+  padding: var(--space-lg) 0;
+  width: 100%;
+}
+
+.carouselTrack {
+  display: flex;
+  gap: var(--space-xl);
+  animation: scroll 20s linear infinite;
+}
+
+.carouselItem {
+  flex: 0 0 auto;
+  min-width: 150px;
+}
+
+.partnerLogo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-firma-azul);
+  background: var(--color-white);
+  padding: var(--space-md);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.partnerLogo:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause on hover */
+.carousel:hover .carouselTrack {
+  animation-play-state: paused;
+}

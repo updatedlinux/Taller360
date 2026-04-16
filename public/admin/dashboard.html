@@ -18,7 +18,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/admin/css/admin.css" />
     <script src="/shared/js/config.js"></script>
-    <script type="module" src="/shared/js/supabase-client.js"></script>
     <script type="module" src="/shared/js/auth.js"></script>
   </head>
   <body class="min-h-screen bg-[#1e293b] font-sans text-slate-100 antialiased">
@@ -71,7 +70,7 @@
               <div>
                 <p class="text-sm font-medium text-slate-400">Talleres registrados</p>
                 <p id="metric-total-tenants" class="mt-2 text-3xl font-bold text-white">—</p>
-                <p class="mt-1 text-xs text-slate-500">Total en <span class="text-slate-400">public.tenants</span></p>
+                <p class="mt-1 text-xs text-slate-500">Total en base de datos</p>
               </div>
               <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
                 <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +78,7 @@
                 </svg>
               </span>
             </div>
-            <p class="mt-3 text-xs text-emerald-400/90">↑ Datos en vivo vía Supabase</p>
+            <p class="mt-3 text-xs text-emerald-400/90">↑ Datos en vivo vía API</p>
           </article>
 
           <article class="rounded-2xl border border-slate-600/50 bg-[#334155] p-5 shadow-lg shadow-black/20">
@@ -103,7 +102,7 @@
               <div>
                 <p class="text-sm font-medium text-slate-400">Usuarios totales</p>
                 <p id="metric-profiles" class="mt-2 text-3xl font-bold text-white">—</p>
-                <p class="mt-1 text-xs text-slate-500">Filas en <span class="text-slate-400">public.profiles</span></p>
+                <p class="mt-1 text-xs text-slate-500">Tabla de perfiles</p>
               </div>
               <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400">
                 <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">

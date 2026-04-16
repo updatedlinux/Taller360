@@ -1,0 +1,1180 @@
+/* Home Page Styles - Matching PDF UI Reference */
+
+/* ===== HERO SECTION ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  padding: 0 0 calc(var(--space-2xl) + var(--container-padding)) 0;
+  position: relative;
+  overflow: clip;
+}
+
+/* Apply grid to container inside hero */
+.hero > div:not([aria-hidden]) {
+  display: grid;
+  grid-template-rows: var(--navbar-offset) 1fr auto;
+  min-height: calc(100vh - var(--space-2xl) - var(--container-padding));
+  width: 100%;
+  padding-bottom: calc(var(--space-2xl) + var(--container-padding));
+}
+
+/* Fluid canvas layers (behind content) */
+.fluidContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.fluidCanvas {
+  position: absolute;
+  inset: -3rem; /* overscan to avoid edge clipping */
+  width: calc(100% + 6rem);
+  height: calc(100% + 6rem);
+  filter: blur(14px);
+  opacity: 0.6; /* ensure paint reads clearly over base */
+}
+
+.grainOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url(var(--base-url)images/temp/grain.webp);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+}
+
+.fluidNoise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.18;
+  mix-blend-mode: color-burn;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
+<filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.99' numOctaves='20' stitchTiles='stitch'/></filter>\
+<rect width='100%' height='100%' filter='url(#a)'/>\
+</svg>");
+}
+
+.heroContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Equal columns for better space distribution */
+  gap: clamp(1.5rem, 3vw + 2vh, 4rem);
+  align-items: center;
+  position: relative;
+  z-index: 3; /* above fluid effects */
+  grid-row: 2;
+  min-height: 0;
+  width: 100%; /* Ensure full width */
+  padding-top: calc(var(--navbar-offset) * 0.75); /* Visual correction: push content down for better centering */
+}
+
+.heroText {
+  padding-top: var(--space-md);
+  width: 100%; /* Take full width of its grid column */
+}
+
+.heroText h1 {
+  font-size: clamp(2.5rem, 5vw + 3vh, 8rem);
+  font-weight: 500;
+  line-height: 0.95;
+  color: var(--color-text-primary);
+  margin-bottom: clamp(0.75rem, 1.5vh + 0.5vw, var(--space-sm));
+  font-family: var(--font-primary);
+  letter-spacing: -0.02em;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 1vh + 0.5vw, var(--space-lg));
+  flex-wrap: nowrap;
+}
+
+.heroSubtext {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.5rem, 0.8vh, var(--space-sm));
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-size: clamp(0.85rem, 1vh + 0.3vw, 1rem);
+  line-height: 1.4;
+  max-width: 500px;
+}
+
+.subtextIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(20px, 2vh + 0.5vw, 28px);
+  height: clamp(20px, 2vh + 0.5vw, 28px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-primary);
+  font-size: clamp(12px, 1.2vh + 0.3vw, 16px);
+  flex-shrink: 0;
+}
+
+.subtextText {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  margin: 0;
+  font-size: var(--h4);
+  font-family: var(--font-primary);
+}
+
+.heroImageWrapper {
+  position: relative;
+  border-radius: 24px 0 24px 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 3; /* Wider landscape ratio to grow horizontally */
+  width: 100%; /* Take full width of its grid column */
+  max-width: none; /* Remove any width constraints */
+  max-height: calc(100vh - var(--navbar-offset) - var(--space-lg)); /* Allow more height on big screens */
+  justify-self: end; /* Align to the right edge of the grid column */
+  border: 1px solid var(--color-border-grey);
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+/* ===== RATES CARDS (Inside Hero) ===== */
+.ratesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(0.75rem, 1vw + 0.5vh, 1.5rem);
+  position: relative;
+  z-index: 3; /* above fluid effects */
+  grid-row: 3;
+  margin-top: clamp(var(--space-lg), 3vh, var(--space-2xl)); /* Add spacing from hero content */
+}
+
+.rateCard {
+  padding: clamp(1rem, 1.5vh + 0.8vw, 2rem);
+  border-radius: 24px 0 24px 0;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1vh + 0.3vw, 1.5rem);
+  min-height: clamp(100px, 12vh, 140px);
+}
+
+.rateCardUsd {
+  background: var(--color-red-electrica);
+}
+
+.rateCardEur {
+  background: var(--color-alerta);
+}
+
+.rateCardDate {
+  background: var(--color-firma-azul);
+}
+
+.rateHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rateLabel {
+  font-size: clamp(0.75rem, 0.8vh + 0.4vw, 1rem);
+  font-weight: 500;
+  font-family: var(--font-primary);
+  opacity: 0.95;
+  margin: 0;
+}
+
+.rateIcon {
+  width: clamp(20px, 2vh + 0.5vw, 28px);
+  height: clamp(20px, 2vh + 0.5vw, 28px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.rateIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.rateValue {
+  font-size: clamp(1.5rem, 2vh + 1vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  margin: 0;
+  font-family: var(--font-primary);
+}
+
+/* ===== REMITTANCE SECTION ===== */
+.remittanceSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.remittanceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(3rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.remittanceTitle h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+}
+
+.remittanceContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap, let btn-wrapper handle spacing */
+}
+
+.remittanceContent p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+  margin-bottom: var(--space-sm); /* Space below paragraph before button */
+}
+
+.remittanceContent .revealTextSmall {
+  margin-top: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* ===== MARQUEE SECTION (DIVIDER) ===== */
+.marqueeSection {
+  background: var(--color-background);
+  padding: var(--space-lg) 0;
+  overflow: hidden;
+}
+
+/* ===== ANNOUNCEMENT SECTION (CONVOCATORIA) ===== */
+.announcementSection {
+  background: var(--color-background);
+  padding: var(--space-2xl) 0;
+}
+
+.announcementCard {
+  background: var(--color-caja-fuerte);
+  border-radius: 24px 0 24px 0;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  padding-left: calc(clamp(1.5rem, 4vw, 2.5rem) + 6px);
+  border: 1px solid var(--color-border-grey);
+  position: relative;
+  overflow: hidden;
+}
+
+.announcementCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-red-electrica) 0%, var(--color-alerta) 100%);
+}
+
+.announcementHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border-grey);
+}
+
+.announcementBadge {
+  background: var(--color-red-electrica);
+  color: var(--color-white);
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  width: fit-content;
+}
+
+.announcementHeader h3 {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0.5rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.announcementTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.announcementContent {
+  color: var(--color-text-secondary);
+}
+
+.announcementContent p {
+  font-size: clamp(0.8125rem, 1.5vw, 0.9375rem);
+  line-height: 1.7;
+  margin: 0.75rem 0;
+}
+
+.announcementContent strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.announcementSignature {
+  text-align: right;
+  margin-top: 1.5rem !important;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-grey);
+  color: var(--color-text-secondary);
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem) !important;
+}
+
+.announcementNote {
+  font-size: clamp(0.6875rem, 1.25vw, 0.8125rem) !important;
+  margin-top: 1.5rem !important;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-alerta);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .announcementCard {
+    padding: clamp(1rem, 3vw, 1.5rem);
+    padding-left: calc(clamp(1rem, 3vw, 1.5rem) + 6px);
+  }
+
+  .announcementContent p {
+    text-align: left;
+  }
+
+  .announcementSignature {
+    text-align: center;
+  }
+}
+
+/* ===== GLOBAL SECTION ===== */
+.globalSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.globalContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 3vw, 2rem);
+  align-items: stretch;
+}
+
+.globeCard {
+  border-radius: 24px 0 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+  background: url(var(--base-url)images/sections/global-bg.webp) center/cover, var(--color-caja-fuerte);
+  border: 1px solid var(--color-border-grey);
+}
+
+.globeCard spline-viewer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  transform: scale(1.25);
+}
+
+.globeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  position: absolute;
+  inset: 0;
+}
+
+.globeGraphic {
+  font-size: clamp(10rem, 18vw, 16rem);
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.globalCard {
+  background: var(--color-red-electrica);
+  padding: clamp(3rem, 6vw, 5rem);
+  border-radius: 24px 0 24px 0;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.globalIntro {
+  font-weight: 400;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-secondary);
+}
+
+.globalNumber {
+  font-size: clamp(4rem, 8vw, 6rem);
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: var(--space-xl);
+  font-family: var(--font-primary);
+}
+
+.globalDescription {
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.globalSubtext {
+  line-height: 1.6;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.countryList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3.5rem);
+  margin-top: var(--space-md);
+}
+
+.countryColumn {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.65rem, 1.25vw, 0.85rem);
+}
+
+.countryItem {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+  font-family: var(--font-primary);
+  font-size: var(--body-sm);
+  font-weight: 300;
+  color: var(--color-text-primary);
+}
+
+.countryDot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-billete-nuevot);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== LOCATION SECTION ===== */
+.locationSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.locationContent {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.locationContent h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.locationContent p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+/* ===== PAYMENT SECTION ===== */
+.paymentSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.paymentImageWrapper {
+  position: relative;
+  border-radius: 24px 0 24px 0;
+  overflow: hidden;
+  width: 100%;
+  max-height: 60vh;
+  margin-bottom: var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-grey);
+}
+
+.paymentImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.paymentMaskWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  --mask-size: 0rem;
+  mask-image: url('/logos/isologo_filled.svg');
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: var(--mask-size);
+  -webkit-mask-image: url('/logos/isologo_filled.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: var(--mask-size);
+  will-change: mask-size, -webkit-mask-size, opacity;
+}
+
+.paymentImageAfter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.paymentLogoWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.paymentLogoWrapper svg {
+  width: clamp(15rem, 25vw, 22rem);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+  color: var(--color-white);
+}
+
+.paymentLogoWrapper svg path {
+  /* Stroke and fill controlled by GSAP animation */
+  fill: none;
+}
+
+
+.paymentGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  align-items: stretch;
+}
+
+.paymentTitle {
+  display: flex;
+  align-items: center;
+}
+
+.paymentTitle h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  margin: 0;
+}
+
+.paymentCard {
+  padding: clamp(1.5rem, 3vw, 2rem);
+  padding-right: clamp(3.5rem, 5vw, 4.5rem);
+  border-radius: 24px 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.paymentCard:hover {
+  transform: translateY(-4px);
+}
+
+.paymentCardActive {
+  flex: 2;
+}
+
+.paymentCardInactive {
+  flex: 1;
+  opacity: 0.7;
+}
+
+.paymentCardInactive:hover {
+  opacity: 1;
+}
+
+.paymentCardText {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  margin-bottom: clamp(0.75rem, 1.5vw, 1rem);
+  padding-right: clamp(2rem, 3vw, 2.5rem);
+  font-family: var(--font-primary);
+  text-align: left;
+  max-width: 100%;
+}
+
+.paymentCardDescription {
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  font-weight: 300;
+  line-height: 1.4;
+  margin: 0;
+  padding-right: clamp(2rem, 3vw, 2.5rem);
+  font-family: var(--font-primary);
+  text-align: left;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paymentCardActive .paymentCardDescription {
+  opacity: 1;
+  max-height: 200px;
+  margin-top: var(--space-sm);
+}
+
+.paymentCardIcon {
+  position: absolute;
+  bottom: clamp(1rem, 2vw, 1.5rem);
+  right: clamp(1rem, 2vw, 1.5rem);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paymentCardActive .paymentCardIcon {
+  transform: scale(1.15);
+}
+
+.paymentCardIcon svg {
+  width: 24px;
+  height: auto;
+  display: block;
+}
+
+.paymentCardPagoMovil {
+  background: var(--color-billete-nuevot);
+  color: var(--color-firma-azul);
+}
+
+.paymentCardCredito {
+  background: var(--color-red-electrica);
+  color: var(--color-white);
+}
+
+.paymentCardRetiro {
+  background: var(--color-firma-azul);
+  color: var(--color-white);
+}
+
+/* ===== SCROLL REVEAL TEXT SECTION ===== */
+.revealSection {
+  background: var(--color-background);
+  padding: clamp(4rem, 10vw, 8rem) 0;
+  overflow: hidden;
+}
+
+.revealText {
+  max-width: 100%;
+}
+
+.revealText p {
+  font-size: clamp(2.5rem, 5vw + 3vh, 8rem);
+  font-weight: 500;
+  line-height: 1.1;
+  font-family: var(--font-primary);
+}
+
+.revealText p span {
+  display: inline;
+}
+
+.revealTextSmall {
+  font-size: clamp(1.5rem, 3vw, 2.5rem) !important;
+  line-height: 1.2 !important;
+  margin-top: clamp(2rem, 4vw, 3rem);
+  font-weight: 300 !important;
+  opacity: 0.9;
+}
+
+/* ===== FAQ SECTION ===== */
+.faqSection {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0;
+}
+
+.faqTitle {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+}
+
+.faqGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.faqLeft {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.faqContent {
+  margin-top: var(--space-lg);
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.faqItemWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqItem {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px 0 16px 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  color: var(--color-text-primary);
+  text-align: left;
+  font-size: var(--h4);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.faqItem:hover {
+  border-color: var(--color-red-electrica);
+  background: rgba(66, 43, 226, 0.05);
+}
+
+.faqItemOpen {
+  border-color: var(--color-red-electrica);
+  background: rgba(66, 43, 226, 0.08);
+}
+
+.faqIcon {
+  font-size: 1.5rem;
+  color: var(--color-red-electrica);
+  font-weight: 300;
+  transition: transform 0.3s ease;
+}
+
+.faqAnswer {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  padding-top: 0;
+  color: var(--color-saldo-claro);
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  font-family: var(--font-secondary);
+  line-height: 1.6;
+  animation: fadeIn 0.3s ease;
+}
+
+.faqAnswer p {
+  margin: 0;
+  padding-top: var(--space-sm);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.faqCtaContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqCtaCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-red-electrica);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.faqCtaImage {
+  width: 100%;
+  flex: 1.2;
+  min-height: 300px;
+  background: url(var(--base-url)images/temp/confianza.webp) center center / cover no-repeat;
+  background-color: var(--color-firma-azul);
+}
+
+.faqCtaContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-lg);
+  justify-content: flex-start;
+}
+
+.faqCtaContent h2 {
+  margin-bottom: var(--space-sm);
+}
+
+.faqCtaContent p {
+  margin-bottom: var(--space-md);
+}
+
+.faqCtaSpacer {
+  margin-top: auto;
+  height: var(--space-sm);
+}
+
+/* ===== FINAL CTA SECTION ===== */
+.finalCta {
+  background: var(--color-background);
+  padding: var(--space-3xl) 0 var(--space-2xl) 0;
+}
+
+.finalCtaCard {
+  background: var(--color-red-electrica);
+  padding: clamp(3rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
+  border-radius: 24px 0 24px 0;
+  text-align: center;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.finalCtaCard h2 {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Laptop screens - optimize spacing and card sizes */
+@media (max-width: 1440px) {
+  .hero {
+    padding: 0 0 calc(clamp(1.5rem, 2vh, 2rem) + var(--container-padding)) 0;
+  }
+
+  .hero > div:not([aria-hidden]) {
+    min-height: calc(100vh - clamp(1.5rem, 2vh, 2rem) - var(--container-padding));
+    padding-bottom: calc(clamp(1.5rem, 2vh, 2rem) + var(--container-padding));
+  }
+
+  .rateCard {
+    padding: clamp(1rem, 1.2vh + 0.6vw, 1.5rem);
+    min-height: clamp(90px, 10vh, 120px);
+  }
+
+  .rateValue {
+    font-size: clamp(1.25rem, 1.5vh + 0.8vw, 2rem);
+  }
+
+  .heroContent {
+    gap: clamp(1.5rem, 2.5vw, 3rem);
+  }
+
+  .heroImageWrapper {
+    max-height: calc(100vh - var(--navbar-offset) - var(--space-3xl));
+  }
+}
+
+@media (max-width: 1280px) {
+  .heroContent {
+    gap: clamp(1.5rem, 2vw, 2.5rem);
+  }
+
+  .ratesGrid {
+    gap: clamp(0.75rem, 1vw, 1.25rem);
+    margin-bottom: clamp(1rem, 2vh, 1.5rem);
+  }
+
+  .rateCard {
+    padding: clamp(0.875rem, 1vh + 0.5vw, 1.25rem);
+    min-height: clamp(85px, 9vh, 110px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .heroImageWrapper {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .remittanceGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .globalContent,
+  .faqContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .paymentGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .faqContent {
+    grid-template-columns: 1fr;
+  }
+
+  .ratesGrid {
+    gap: var(--space-sm);
+  }
+
+  .rateCard {
+    min-height: clamp(80px, 8vh, 100px);
+  }
+}
+
+/* Tablet breakpoint - starts vertical layout at 1080px */
+@media (max-width: 1080px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  
+  .heroImageWrapper {
+    width: 100%;
+    max-width: none; /* Full width at this breakpoint */
+    aspect-ratio: 16 / 9; /* Wide aspect ratio for full width effect */
+    max-height: calc(100vh - var(--navbar-offset) - var(--space-lg)); /* Allow more height on big screens */
+    justify-self: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--space-lg) 0 var(--space-xl) 0;
+  }
+
+  .heroText {
+    padding-top: 0;
+  }
+
+  .heroContent {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    padding-top: 0; /* Remove top padding on mobile */
+  }
+
+  /* Move image to top on mobile */
+  .heroImageWrapper {
+    order: -1; /* Places image before text */
+    width: 100%;
+    max-width: none;
+    aspect-ratio: 4 / 4.5; /* Taller aspect ratio for mobile */
+    max-height: 65vh; /* Limit height to 65% of viewport */
+    margin: 0 auto var(--space-md);
+    border-radius: 16px 0 16px 0; /* Slightly smaller radius for mobile */
+  }
+
+  .heroImage {
+    object-fit: cover;
+    object-position: center top; /* Focus on top of image */
+  }
+
+  .heroActions {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .heroSubtext {
+    max-width: none;
+  }
+
+  .ratesGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .remittanceGrid {
+    gap: var(--space-md);
+  }
+
+  .remittanceTitle,
+  .remittanceContent {
+    text-align: center;
+  }
+
+  .remittanceContent {
+    align-items: center;
+  }
+
+  .remittanceContent .btn-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .locationContent {
+    text-align: center;
+  }
+
+  .paymentGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .countryList {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
+  }
+
+  .countryColumn {
+    gap: clamp(0.5rem, 1vw, 0.65rem);
+  }
+
+  /* Reduce section padding on mobile to prevent large jumps */
+  .remittanceSection,
+  .globalSection,
+  .locationSection,
+  .paymentSection,
+  .faqSection {
+    padding: var(--space-xl) 0;
+  }
+
+  .finalCta {
+    padding: var(--space-xl) 0 var(--space-lg) 0;
+  }
+
+  /* Make cards responsive on mobile */
+  .globeCard {
+    min-height: 300px;
+    max-height: 400px;
+  }
+
+  .globalCard {
+    padding: clamp(2rem, 5vw, 3rem);
+  }
+
+  .globalCard,
+  .finalCtaCard {
+    min-height: auto;
+  }
+
+  .globalNumber {
+    font-size: clamp(3rem, 12vw, 5rem);
+    margin-bottom: var(--space-lg);
+  }
+
+  .faqCtaImage {
+    flex: none;
+    height: 200px;
+    min-height: 200px;
+  }
+
+  .faqGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+}

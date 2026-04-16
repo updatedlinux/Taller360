@@ -1,0 +1,87 @@
+/* RateCards Component Styles */
+
+.rateCards {
+  margin-top: var(--space-lg);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.rateCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.rateHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.flag {
+  font-size: 32px;
+}
+
+.currency {
+  font-family: var(--font-brand);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-caja-fuerte);
+  margin: 0;
+}
+
+.code {
+  font-size: var(--body-xs);
+  color: var(--color-firma-azul);
+  opacity: 0.8;
+}
+
+.rateValues {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.rateItem {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.label {
+  font-size: var(--body-xs);
+  color: var(--color-caja-fuerte);
+  opacity: 0.6;
+  margin-bottom: var(--space-xs);
+}
+
+.value {
+  font-family: var(--font-brand);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-firma-azul);
+}
+
+.change {
+  text-align: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-saldo-claro);
+}
+
+.positive {
+  color: var(--color-billete-nuevot);
+}
+
+.negative {
+  color: var(--color-alerta);
+}
+
+.updateTime {
+  text-align: center;
+  margin-top: var(--space-lg);
+  opacity: 0.6;
+}

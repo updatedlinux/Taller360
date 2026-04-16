@@ -2,27 +2,24 @@ const path = require('path');
 
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-/** Clave publicable (anon / publishable). Compat: SUPABASE_ANON_KEY si aún existe. */
-const supabaseKey =
-  process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '';
-
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3000', 10),
-  supabase: {
-    url: process.env.SUPABASE_URL || '',
-    key: supabaseKey,
-    /** Solo servidor: Admin API y bypass RLS (opcional). */
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-  },
+  databaseUrl: process.env.DATABASE_URL || '',
+  jwtSecret: process.env.JWT_SECRET || '',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  uploadsDir: path.resolve(__dirname, '../../uploads'),
   corsOrigins: (process.env.CORS_ORIGIN || '*')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
 };
 
-if (!env.supabase.url || !env.supabase.key) {
-  console.warn('[env] Defina SUPABASE_URL y SUPABASE_KEY en .env');
+if (!env.databaseUrl) {
+  console.warn('[env] Defina DATABASE_URL en backend/.env (SQL Server)');
+}
+if (!env.jwtSecret || env.jwtSecret.length < 16) {
+  console.warn('[env] Defina JWT_SECRET seguro (>= 16 caracteres) en backend/.env');
 }
 
 module.exports = { env };

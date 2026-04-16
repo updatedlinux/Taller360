@@ -1,0 +1,438 @@
+/* Contacto Page Styles */
+
+/* ===== HERO SECTION ===== */
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  background: var(--color-background);
+  padding-top: calc(var(--navbar-offset) + var(--container-padding));
+  padding-right: var(--container-padding);
+  padding-bottom: calc(var(--navbar-offset) + var(--container-padding));
+  padding-left: var(--container-padding);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  inset: var(--container-padding);
+  background: url(var(--base-url)images/temp/confianza.webp) left center / cover no-repeat;
+  border-radius: var(--radius-lg);
+  z-index: 0;
+}
+
+/* Fluid canvas layers (behind content) */
+.fluidContainerOLD {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.fluidCanvasOLD {
+  position: absolute;
+  inset: -3rem; /* overscan to avoid edge clipping */
+  width: calc(100% + 6rem);
+  height: calc(100% + 6rem);
+  filter: blur(14px);
+  opacity: 0.6; /* ensure paint reads clearly over base */
+}
+
+.fluidNoiseOLD {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.18;
+  mix-blend-mode: color-burn;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
+<filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.99' numOctaves='20' stitchTiles='stitch'/></filter>\
+<rect width='100%' height='100%' filter='url(#a)'/>\
+</svg>");
+  background-size: 200px 200px;
+}
+
+.heroGrid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(3rem, 8vw, 6rem);
+  align-items: center;
+  width: 100%;
+}
+
+.heroText {
+  max-width: 65%;
+}
+
+.heroText h1 {
+  font-size: clamp(2.5rem, 6vw, 6rem);
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-primary);
+  letter-spacing: -0.01em;
+}
+
+.heroText p {
+  font-size: var(--body);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+}
+
+.contact {
+  padding: var(--space-3xl) 0;
+  background: var(--color-background);
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.contactFormContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ctaContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ctaCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-red-electrica);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ctaImage {
+  width: 100%;
+  flex: 1.2;
+  min-height: 50%;
+  background: url(var(--base-url)images/temp/atencion.webp) center center / cover no-repeat;
+}
+
+.ctaContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-lg);
+  justify-content: space-between;
+}
+
+.ctaSpacer {
+  flex: 1;
+  min-height: var(--space-sm);
+}
+
+.form {
+  margin-top: var(--space-sm);
+}
+
+.formGroup {
+  margin-bottom: var(--space-md);
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px 0 24px 0;
+  font-size: var(--body-sm);
+  font-family: var(--font-primary);
+  transition: border-color var(--transition-base);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-red-electrica);
+}
+
+.contactInfo {
+  padding: var(--space-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px 0 24px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.infoItem {
+  margin-bottom: var(--space-lg);
+}
+
+.infoItem:last-child {
+  margin-bottom: 0;
+}
+
+.infoItem h4 {
+  margin-bottom: var(--space-xs);
+  color: var(--color-text-primary);
+}
+
+/* Laptop responsive adjustments */
+@media (max-width: 1440px) {
+  .heroContent {
+    gap: clamp(1rem, 1.8vw, 2rem);
+  }
+
+  .infoCard {
+    padding: clamp(0.625rem, 0.8vh + 0.4vw, 1rem);
+    gap: clamp(0.375rem, 0.5vh + 0.2vw, 0.625rem);
+  }
+
+  .heroRight {
+    gap: clamp(0.5rem, 0.7vh + 0.3vw, 0.75rem);
+    max-height: 65vh;
+    min-height: 55vh;
+  }
+}
+
+@media (max-width: 1280px) {
+  .heroContent {
+    gap: clamp(1rem, 1.5vw, 1.5rem);
+  }
+
+  .heroRight {
+    max-height: 60vh;
+    min-height: 50vh;
+  }
+
+  .infoCard {
+    padding: clamp(0.75rem, 1vh + 0.5vw, 1.125rem);
+  }
+}
+
+@media (max-width: 968px) {
+  .hero {
+    height: auto;
+    min-height: 100vh;
+    padding: calc(var(--navbar-offset) + var(--space-lg)) var(--container-padding) var(--space-2xl) var(--container-padding);
+  }
+
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.75rem, 1.5vw + 1vh, var(--space-xl));
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+  overflow: hidden;
+}
+
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 0.8vh + 0.4vw, var(--space-lg));
+  align-items: flex-start;
+  justify-content: center;
+  flex-shrink: 1;
+}
+
+.heroTitle {
+  font-size: clamp(1.75rem, 2vw + 2.5vh, var(--h1));
+  font-weight: 500;
+  line-height: 1;
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+}
+
+.heroRight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(0.35rem, 0.5vh + 0.2vw, var(--space-sm));
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: stretch;
+  max-height: 70vh;
+  min-height: 60vh;
+}
+
+@media (max-width: 968px) {
+  .heroRight {
+    min-height: 0;
+  }
+}
+
+.infoCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: clamp(1rem, 1.2vh + 0.6vw, 1.5rem);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(0.5rem, 0.6vh + 0.3vw, 0.75rem);
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.infoCard:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.cardLabel {
+  display: block;
+  font-size: clamp(0.75rem, 0.6vh + 0.4vw, 0.875rem);
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0;
+  font-family: var(--font-secondary);
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+
+.cardValue {
+  font-size: clamp(0.9375rem, 0.85vh + 0.5vw, 1.0625rem);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  display: block;
+  flex-shrink: 1;
+  word-break: break-word;
+}
+
+.cardValue a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Remove default margins from any nested elements */
+.cardValue p {
+  margin: 0;
+  padding: 0;
+}
+
+.cardIcon {
+  position: absolute;
+  top: clamp(1rem, 1.2vh + 0.6vw, 1.5rem);
+  right: clamp(1rem, 1.2vh + 0.6vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all var(--transition-base);
+  width: clamp(16px, 1.4vh + 0.6vw, 22px);
+  height: clamp(16px, 1.4vh + 0.6vw, 22px);
+  flex-shrink: 0;
+}
+
+.infoCard:hover .cardIcon {
+  color: var(--color-text-primary);
+  transform: translate(4px, -4px);
+}
+
+.ctaButtons {
+  grid-column: span 2;
+  display: flex;
+  gap: clamp(0.4rem, 0.5vh + 0.2vw, var(--space-md));
+  margin-top: 0;
+  flex-shrink: 0;
+  min-height: 0;
+  max-height: clamp(2.5rem, 4vh + 1vw, 4rem);
+}
+
+.ctaButtons > * {
+  flex: 1;
+}
+
+@media (max-width: 968px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    padding-bottom: var(--space-xl);
+  }
+
+  .heroLeft {
+    order: 1;
+  }
+
+  .heroRight {
+    order: 2;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: var(--space-md);
+    min-height: auto;
+    max-height: none;
+    padding-bottom: var(--space-md);
+  }
+
+  .infoCard {
+    padding: clamp(1rem, 3vw, 1.25rem);
+    gap: var(--space-xs);
+  }
+
+  .cardLabel {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .cardValue {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .ctaButtons {
+    grid-column: span 1;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: 0;
+  }
+
+  .contactGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .contactFormContainer,
+  .ctaContainer {
+    height: auto;
+  }
+
+  .ctaCard {
+    height: auto;
+  }
+
+  .ctaImage {
+    flex: none;
+    height: 200px;
+    min-height: 200px;
+  }
+}

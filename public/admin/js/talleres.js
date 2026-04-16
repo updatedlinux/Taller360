@@ -1,4 +1,5 @@
 import { guardDashboard, subscribeAuthRedirect, logout } from '/shared/js/auth.js';
+import { apiJson } from '/shared/js/api.js';
 import {
   renderSidebarNav,
   setupAdminChrome,
@@ -11,16 +12,6 @@ import {
 
 const PAGE_SIZE = 10;
 
-function ilikeOrFilter(searchRaw) {
-  const t = String(searchRaw || '')
-    .trim()
-    .replace(/\\/g, '\\\\')
-    .replace(/%/g, '\\%')
-    .replace(/_/g, '\\_');
-  if (!t) return null;
-  return `name.ilike.%${t}%,rif.ilike.%${t}%`;
-}
-
 let state = {
   page: 0,
   status: 'all',
@@ -30,22 +21,8 @@ let state = {
 
 let ctxRef = null;
 
-function buildQuery(supabase) {
-  let q = supabase.from('tenants').select('*', { count: 'exact' });
-  if (state.status !== 'all') {
-    q = q.eq('status', state.status);
-  }
-  const orF = ilikeOrFilter(state.search);
-  if (orF) {
-    q = q.or(orF);
-  }
-  const from = state.page * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-  return q.order('created_at', { ascending: false }).range(from, to);
-}
-
 async function refreshTable() {
-  const supabase = ctxRef.supabase;
+  const accessToken = ctxRef.accessToken;
   const tb = document.getElementById('tbody-tenants');
   const meta = document.getElementById('pagination-meta');
   const errEl = document.getElementById('err');
@@ -56,9 +33,18 @@ async function refreshTable() {
     errEl.textContent = '';
   }
 
-  const { data, error, count } = await buildQuery(supabase);
-  if (error) {
-    const msg = error.message || 'Error al cargar talleres';
+  const params = new URLSearchParams({
+    page: String(state.page),
+    pageSize: String(PAGE_SIZE),
+    status: state.status,
+    search: state.search,
+  });
+
+  let json;
+  try {
+    json = await apiJson(`/api/admin/tenants?${params.toString()}`, accessToken);
+  } catch (e) {
+    const msg = e.message || 'Error al cargar talleres';
     if (errEl) {
       errEl.textContent = msg;
       errEl.classList.remove('hidden');
@@ -67,7 +53,7 @@ async function refreshTable() {
     return;
   }
 
-  state.totalCount = count ?? 0;
+  state.totalCount = json.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(state.totalCount / PAGE_SIZE));
   if (state.page >= totalPages) {
     state.page = Math.max(0, totalPages - 1);
@@ -80,7 +66,7 @@ async function refreshTable() {
     meta.textContent = `${start}–${end} de ${state.totalCount}`;
   }
 
-  const rows = data || [];
+  const rows = json.data || [];
   if (!rows.length) {
     tb.innerHTML =
       '<tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">No hay resultados con los filtros actuales.</td></tr>';
@@ -141,10 +127,9 @@ function fillDetailModal(t) {
   document.getElementById('detail-owner-id').textContent = t.owner_id || '—';
 }
 
-async function loadTenantById(supabase, id) {
-  const { data, error } = await supabase.from('tenants').select('*').eq('id', id).maybeSingle();
-  if (error) throw error;
-  return data;
+async function loadTenantById(accessToken, id) {
+  const json = await apiJson(`/api/admin/tenants/${encodeURIComponent(id)}`, accessToken);
+  return json.data;
 }
 
 async function main() {
@@ -156,7 +141,7 @@ async function main() {
   document.getElementById('header-user-name').textContent = ctx.profile.full_name;
   setupAdminChrome();
   document.getElementById('btn-admin-logout')?.addEventListener('click', () => logout());
-  subscribeAuthRedirect(ctx.supabase);
+  subscribeAuthRedirect(null);
 
   const toast = document.getElementById('toast');
 
@@ -203,7 +188,7 @@ async function main() {
 
     if (action === 'view') {
       try {
-        const row = await loadTenantById(ctx.supabase, id);
+        const row = await loadTenantById(ctx.accessToken, id);
         if (!row) {
           showToast(toast, 'Taller no encontrado', 'error');
           return;
@@ -218,9 +203,13 @@ async function main() {
 
     if (action === 'suspend' || action === 'activate') {
       const status = action === 'suspend' ? 'suspended' : 'active';
-      const { error } = await ctx.supabase.from('tenants').update({ status }).eq('id', id);
-      if (error) {
-        showToast(toast, error.message, 'error');
+      try {
+        await apiJson(`/api/admin/tenants/${encodeURIComponent(id)}`, ctx.accessToken, {
+          method: 'PATCH',
+          body: { status },
+        });
+      } catch (err) {
+        showToast(toast, err.message || 'Error', 'error');
         return;
       }
       showToast(toast, 'Estado actualizado', 'ok');
@@ -254,9 +243,10 @@ async function main() {
     if (owner_email !== null) payload.owner_email = owner_email;
     if (address !== null) payload.address = address;
 
-    const { error } = await ctx.supabase.from('tenants').insert(payload);
-    if (error) {
-      showToast(toast, error.message || 'No se pudo registrar', 'error');
+    try {
+      await apiJson('/api/admin/tenants', ctx.accessToken, { method: 'POST', body: payload });
+    } catch (err) {
+      showToast(toast, err.message || 'No se pudo registrar', 'error');
       return;
     }
     closeModal('modal-register');
@@ -270,7 +260,7 @@ async function main() {
   const viewId = new URLSearchParams(window.location.search).get('view');
   if (viewId) {
     try {
-      const row = await loadTenantById(ctx.supabase, viewId);
+      const row = await loadTenantById(ctx.accessToken, viewId);
       if (row) {
         fillDetailModal(row);
         openModal('modal-detail');

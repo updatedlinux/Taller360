@@ -1,0 +1,133 @@
+/* Design System Variables - Insular Casa de Cambio */
+
+:root {
+  /* Base Brand Colors - Never change */
+  --brand-firma-azul: #15152D; /* RGB 19,26,78 - Pantone 2766 C */
+  --brand-red-electrica: #422BE2; /* Electric blue/purple - Pantone 2368 C */
+  --brand-alerta: #f93243; /* RGB 249,50,67 - Pantone Red 032 C */
+  --brand-billete-nuevot: #9bd1b8; /* RGB 155,209,184 - Pantone 344 C */
+  --brand-saldo-claro: #e7e9e4; /* RGB 231,233,228 - Pantone 663 C */
+  --brand-caja-fuerte: #101021; /* RGB 16,16,33 - Pantone Black 6 C */
+
+  /* Dark Mode (Default) */
+  --color-background: #15152D; /* Primary background - Pantone Black 6 C */
+  --color-background-dark: #131a4e; /* Deep blue - Pantone 2766 C */
+  --color-card-gradient-start: #422BE2; /* Electric blue/purple - Pantone 2368 C */
+  --color-card-gradient-end: #9bd1b8; /* Mint green - Pantone 344 C */
+  --color-accent: #f93243; /* Vibrant red for CTAs - Pantone Red 032 C */
+  --color-accent-hover: #ff5577; /* Lighter pink on hover */
+  --color-text-primary: #ffffff; /* White text */
+  --color-text-secondary: #e7e9e4; /* Soft off-white - Pantone 663 C */
+  --color-border: #131a4e; /* Deep blue border */
+  --color-border-grey: rgba(231, 233, 228, 0.15); /* Subtle grey border for glass UI */
+
+  /* Legacy color names - Exact values from Insular Styleguide */
+  --color-caja-fuerte: #15152D; /* RGB 16,16,33 - Pantone Black 6 C */
+  --color-firma-azul: #131a4e; /* RGB 19,26,78 - Pantone 2766 C */
+  --color-red-electrica: #422BE2; /* Electric blue/purple - Pantone 2368 C */
+  --color-alerta: #f93243; /* RGB 249,50,67 - Pantone Red 032 C */
+  --color-billete-nuevot: #9bd1b8; /* RGB 155,209,184 - Pantone 344 C */
+  --color-saldo-claro: #e7e9e4; /* RGB 231,233,228 - Pantone 663 C */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Typography Scale - Bricolage Grotesque & Roboto */
+  --font-brand: "Bricolage Grotesque", sans-serif; /* Primary brand font for headings and display text */
+  --font-primary: "Bricolage Grotesque", sans-serif; /* Alias for brand font */
+  --font-secondary: "Roboto", sans-serif; /* For paragraphs and UI labels */
+  --font-weight-medium: 500; /* For H1/H2 headings */
+  --font-weight-light: 300; /* For secondary headings and large supporting text */
+  --font-weight-regular: 400; /* For body copy */
+  --line-height-base: 1.6;
+  
+  /* Typography sizes - Fluid rem-based system */
+  --display: clamp(3.5rem, 3.214rem + 1.429vw, 6rem); /* ~56px - 96px - Large display text */
+  --h1: clamp(2.75rem, 2.286rem + 2.321vw, 5.25rem); /* ~44px - 84px */
+  --h2: clamp(1.75rem, 1.464rem + 1.429vw, 2.5rem); /* ~28px - 40px */
+  --h3: clamp(1.375rem, 1.179rem + 0.982vw, 1.75rem); /* ~22px - 28px */
+  --h4: clamp(1.25rem, 1.143rem + 0.536vw, 1.5rem); /* ~20px - 24px */
+  --body: clamp(1.25rem, 1.179rem + 0.357vw, 1.5rem); /* ~20px - 24px - Main body/paragraph text */
+  --body-sm: clamp(1.125rem, 1.071rem + 0.268vw, 1.25rem); /* ~18px - 20px */
+  --body-xs: clamp(1rem, 0.964rem + 0.179vw, 1.125rem); /* ~16px - 18px */
+
+  /* Viewport boundaries for fluid scaling */
+  --viewport-min: 20rem; /* 320px */
+  --viewport-max: 90rem; /* 1440px */
+
+  /* Spacing - Fluid rem-based system (scales with user font size and viewport) */
+  --space-xs: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem); /* ~8px - 12px */
+  --space-sm: clamp(1rem, 0.857rem + 0.714vw, 1.5rem); /* ~16px - 24px */
+  --space-md: clamp(1.5rem, 1.286rem + 1.071vw, 2.25rem); /* ~24px - 36px */
+  --space-lg: clamp(2.5rem, 2rem + 2.5vw, 4rem); /* ~40px - 64px */
+  --space-xl: clamp(4rem, 3.143rem + 4.286vw, 6.5rem); /* ~64px - 104px */
+  --space-2xl: clamp(6rem, 4.857rem + 5.714vw, 9.5rem); /* ~96px - 152px */
+  --space-3xl: clamp(8rem, 6.286rem + 8.571vw, 12.5rem); /* ~128px - 200px */
+
+  /* Container System - Multiple widths for different layouts */
+  --container-full: 100vw; /* Full viewport width */
+  --container-max: 100rem; /* ~1600px at 16px base font */
+  --container-narrow: 75vw; /* 75% width for centered sections */
+  --container-padding: var(--space-md);
+  --container-padding-lg: var(--space-lg);
+/* Navbar height compensation for hero sections */  --navbar-height: clamp(4.375rem, 4rem + 1.875vw, 6.25rem); /* ~70px - 100px */  --navbar-offset: calc(var(--navbar-height) + var(--container-padding)); /* Total top offset */
+
+  /* Border Radius - Insular distinctive module shape - Fluid rem-based */
+  --radius-module: clamp(1.5rem, 1.429rem + 0.357vw, 1.75rem) 0 clamp(1.5rem, 1.429rem + 0.357vw, 1.75rem) 0; /* Distinctive corner treatment: top-left rounded, bottom-right rounded */
+  --radius-button: clamp(1.625rem, 1.554rem + 0.357vw, 1.875rem) 0 clamp(1.625rem, 1.554rem + 0.357vw, 1.875rem) 0; /* Primary button radius with same treatment */
+  --radius-sm: clamp(0.75rem, 0.714rem + 0.179vw, 0.875rem) 0 clamp(0.75rem, 0.714rem + 0.179vw, 0.875rem) 0;
+  --radius-md: clamp(1rem, 0.964rem + 0.179vw, 1.125rem) 0 clamp(1rem, 0.964rem + 0.179vw, 1.125rem) 0;
+  --radius-lg: clamp(1.5rem, 1.429rem + 0.357vw, 1.75rem) 0 clamp(1.5rem, 1.429rem + 0.357vw, 1.75rem) 0;
+
+  /* Border widths - Fluid rem-based */
+  --border-width-thin: clamp(0.063rem, 0.05rem + 0.063vw, 0.094rem); /* ~1px - 1.5px */
+  --border-width-base: clamp(0.125rem, 0.107rem + 0.089vw, 0.188rem); /* ~2px - 3px */
+  --border-width-thick: clamp(0.25rem, 0.214rem + 0.179vw, 0.375rem); /* ~4px - 6px */
+
+
+  /* Shadows - flattened */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+
+  /* Transitions - GSAP animations */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease; /* Button hover transition */
+  --transition-slow: 0.4s ease;
+  
+  /* Button specifications - Fluid rem-based */
+  --button-padding: clamp(0.875rem, 0.839rem + 0.179vw, 1rem) clamp(2rem, 1.929rem + 0.357vw, 2.25rem); /* Primary button padding */
+  --button-min-height: clamp(2.75rem, 2.679rem + 0.357vw, 3rem); /* Minimum hit area */
+  --button-shadow-hover: 0 8px 20px rgba(0,0,0,0.2);
+  --button-transform-hover: translateY(-2px);
+
+  /* Z-index */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-notification: 700;
+}
+
+/* Light Mode Theme - Apply .light-mode class to body or parent element */
+.light-mode {
+  --color-background: #ffffff; /* White background */
+  --color-background-dark: #f5f5f5; /* Light gray */
+  --color-text-primary: #101021; /* Dark text */
+  --color-text-secondary: #4a4a4a; /* Gray text */
+  --color-border: #e0e0e0; /* Light border */
+
+  /* Accent colors remain the same for brand consistency */
+  --color-accent: #f93243;
+  --color-accent-hover: #ff5577;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  :root {
+    --container-padding: var(--space-sm);
+  }
+}

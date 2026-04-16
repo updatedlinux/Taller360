@@ -1,0 +1,19 @@
+/* TEAM */
+
+Design & Development: Van Alva
+Site: https://vanalva.io
+Location: Madrid, Spain
+
+/* CLIENT */
+
+Name: Insular Casa de Cambio
+Site: https://insular.io
+Location: Caracas, Venezuela
+
+/* TECHNOLOGY */
+
+Framework: React 19
+Language: TypeScript
+Build Tool: Vite 5
+Animations: GSAP
+Hosting: GoDaddy

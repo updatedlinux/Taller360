@@ -1,0 +1,27 @@
+# robots.txt for Insular Casa de Cambio
+
+# Allow all bots to crawl the site
+User-agent: *
+Allow: /
+
+# Specifically allow knowledge base for AI crawlers
+Allow: /knowledge-base
+
+# Allow AI training bots (for ChatGPT, Claude, etc.)
+User-agent: GPTBot
+Allow: /knowledge-base
+
+User-agent: ChatGPT-User
+Allow: /knowledge-base
+
+User-agent: Anthropic-AI
+Allow: /knowledge-base
+
+User-agent: Claude-Web
+Allow: /knowledge-base
+
+User-agent: Google-Extended
+Allow: /knowledge-base
+
+# Sitemap location
+Sitemap: https://insular.io/sitemap.xml

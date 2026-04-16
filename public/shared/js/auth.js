@@ -1,6 +1,6 @@
-import { getSupabase } from './supabase-client.js';
-
 export const LOGIN_URL = '/auth/login.html';
+
+const TOKEN_KEY = 'taller360_access_token';
 
 export const ROLE_DASHBOARD = {
   SUPERADMIN: '/admin/dashboard.html',
@@ -13,8 +13,12 @@ export function getDashboardPathForRole(role) {
   return ROLE_DASHBOARD[role] || null;
 }
 
+function apiBase() {
+  const b = (window.TALLER360 && window.TALLER360.API_BASE) || '';
+  return String(b).replace(/\/$/, '') || window.location.origin;
+}
+
 /**
- * Mensajes amigables para errores de login (Supabase Auth).
  * @param {{ message?: string; status?: number }} error
  */
 export function mapLoginErrorMessage(error) {
@@ -23,39 +27,32 @@ export function mapLoginErrorMessage(error) {
     return 'No pudimos iniciar sesión. Intenta de nuevo.';
   }
   const lower = m.toLowerCase();
-  if (lower.includes('invalid login') || lower.includes('invalid credentials')) {
+  if (lower.includes('invalid') && lower.includes('credential')) {
     return 'Correo o contraseña incorrectos.';
   }
-  if (lower.includes('email not confirmed')) {
-    return 'Debes confirmar tu correo antes de entrar.';
-  }
-  if (lower.includes('too many requests')) {
+  if (lower.includes('too many')) {
     return 'Demasiados intentos. Espera unos minutos.';
   }
-  if (lower.includes('network')) {
-    return 'Error de red. Comprueba tu conexión.';
-  }
-  if (
-    lower.includes('failed to fetch') ||
-    lower === 'failed to fetch' ||
-    lower.includes('load failed') ||
-    lower.includes('networkerror')
-  ) {
-    return 'No pudimos conectar con el servicio de autenticación. Revisa SUPABASE_URL y la clave pública en config.js, tu red y la configuración del proyecto en Supabase.';
+  if (lower.includes('network') || lower.includes('failed to fetch')) {
+    return 'Error de red. Comprueba tu conexión y que la API esté en marcha.';
   }
   return m;
 }
 
 export const PROFILE_MISSING_MESSAGE =
-  'No hay fila en public.profiles para tu usuario (o RLS no deja verla). En Supabase: Authentication → copia el UUID del usuario y ejecuta INSERT en public.profiles con ese id, rol y datos. Se cerró la sesión.';
+  'No hay perfil asociado a tu usuario. Contacte al administrador.';
 
 /**
- * Cierra sesión Supabase y redirige al login.
+ * Cierra sesión y redirige al login.
  */
 export async function logout() {
   try {
-    const sb = getSupabase();
-    await sb.auth.signOut();
+    await fetch(`${apiBase()}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+  } catch {
+    /* ignore */
+  }
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
   } catch {
     /* ignore */
   }
@@ -63,61 +60,48 @@ export async function logout() {
 }
 
 /**
- * Obtiene fila de public.profiles del usuario (RLS: solo la propia).
- * @param {import('@supabase/supabase-js').SupabaseClient} supabase
- * @param {string} userId - auth.users.id (ej. session.user.id)
- */
-export async function fetchMyProfile(supabase, userId) {
-  if (!userId) {
-    return {
-      profile: null,
-      error: Object.assign(new Error('Falta el id de usuario para cargar el perfil.'), { code: 'MISSING_USER_ID' }),
-    };
-  }
-  // maybeSingle: 0 filas → data null sin error HTTP 406 (.single() falla con "Cannot coerce…")
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, tenant_id, full_name, role, created_at')
-    .eq('id', userId)
-    .maybeSingle();
-  return { profile: data, error };
-}
-
-/**
- * Contexto de autenticación: sesión + perfil.
- * Si hay sesión pero no perfil → signOut y reason `no_profile`.
+ * Contexto de autenticación: token + perfil vía API.
  */
 export async function getAuthContext() {
-  const supabase = getSupabase();
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
-
-  if (sessionError) {
-    return { ok: false, reason: 'session_error', supabase, sessionError };
+  let token;
+  try {
+    token = sessionStorage.getItem(TOKEN_KEY);
+  } catch {
+    token = null;
   }
-  if (!session || !session.access_token) {
-    return { ok: false, reason: 'no_session', supabase };
+  if (!token) {
+    return { ok: false, reason: 'no_session' };
   }
 
-  const { profile, error: profileError } = await fetchMyProfile(supabase, session.user.id);
+  const res = await fetch(`${apiBase()}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
+  });
 
-  if (profileError) {
-    await supabase.auth.signOut();
-    return { ok: false, reason: 'profile_fetch_error', supabase, profileError };
+  if (res.status === 401) {
+    try {
+      sessionStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, reason: 'no_session' };
   }
-  if (!profile) {
-    await supabase.auth.signOut();
-    return { ok: false, reason: 'no_profile', supabase };
+
+  const json = await res.json().catch(() => null);
+  if (!json || !json.ok || !json.profile) {
+    try {
+      sessionStorage.removeItem(TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
+    return { ok: false, reason: 'no_profile' };
   }
 
   return {
     ok: true,
-    supabase,
-    session,
-    accessToken: session.access_token,
-    profile,
+    accessToken: token,
+    profile: json.profile,
+    user: json.user,
   };
 }
 
@@ -139,60 +123,39 @@ export async function redirectIfAuthenticated() {
 }
 
 /**
- * Login: signInWithPassword + perfil + redirección.
+ * Login contra API local + guardado de token + redirección.
  * @returns {Promise<{ ok: true, redirect: string } | { ok: false, message: string }>}
  */
 export async function signInAndRedirectByRole(email, password) {
-  let supabase;
+  let res;
   try {
-    supabase = getSupabase();
+    res = await fetch(`${apiBase()}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
   } catch (e) {
-    console.error('[Taller360 login] getSupabase falló', e);
-    return {
-      ok: false,
-      message: e && e.message ? e.message : 'No se pudo inicializar el cliente de autenticación.',
-    };
-  }
-
-  let signInResult;
-  try {
-    signInResult = await supabase.auth.signInWithPassword({ email, password });
-  } catch (e) {
-    console.error('[Taller360 login] signInWithPassword excepción', e);
     return { ok: false, message: mapLoginErrorMessage(e) };
   }
 
-  console.log('[Taller360 login] signInWithPassword respuesta', {
-    ok: !signInResult.error,
-    errorMessage: signInResult.error ? signInResult.error.message : null,
-  });
-
-  if (signInResult.error) {
-    return { ok: false, message: mapLoginErrorMessage(signInResult.error) };
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { ok: false, message: json.error || mapLoginErrorMessage({ message: res.statusText }) };
+  }
+  if (!json.token || !json.profile) {
+    return { ok: false, message: 'Respuesta de login inválida.' };
   }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) {
-    return { ok: false, message: 'No se pudo obtener la sesión. Intenta de nuevo.' };
+  try {
+    sessionStorage.setItem(TOKEN_KEY, json.token);
+  } catch {
+    /* ignore */
   }
 
-  const { profile, error: pErr } = await fetchMyProfile(supabase, session.user.id);
-  console.log('[Taller360 login] consulta profiles', {
-    hasProfile: !!profile,
-    profileRole: profile ? profile.role : null,
-    profileError: pErr ? pErr.message : null,
-  });
-
-  if (pErr || !profile) {
-    await supabase.auth.signOut();
-    return { ok: false, message: PROFILE_MISSING_MESSAGE };
-  }
-
-  const redirect = getDashboardPathForRole(profile.role);
+  const redirect = getDashboardPathForRole(json.profile.role);
   if (!redirect) {
-    await supabase.auth.signOut();
+    await logout();
     return { ok: false, message: 'Tu rol no tiene portal asignado.' };
   }
 
@@ -201,7 +164,6 @@ export async function signInAndRedirectByRole(email, password) {
 
 /**
  * Protege una página de dashboard: sesión, perfil y rol permitido.
- * Redirige a login o al dashboard correcto si el rol no coincide.
  * @param {object} opts
  * @param {string[]} opts.allowedRoles
  * @returns {Promise<null | object>} null si hubo redirección
@@ -231,20 +193,13 @@ export async function guardDashboard({ allowedRoles }) {
 }
 
 /**
- * Escucha cierre de sesión y sesión inválida.
- * @param {import('@supabase/supabase-js').SupabaseClient} supabase
+ * Reservado para futuros listeners de sesión; con JWT local no hay evento cross-tab estándar.
+ * @param {unknown} _unused
  */
-export function subscribeAuthRedirect(supabase) {
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || !session) {
-      window.location.replace(LOGIN_URL);
-    }
-  });
+export function subscribeAuthRedirect(_unused) {
+  /* no-op */
 }
 
-/**
- * Datos demo para KPIs del taller si la API falla.
- */
 export function getOwnerDashboardMock() {
   return {
     clients: [],
@@ -254,9 +209,6 @@ export function getOwnerDashboardMock() {
   };
 }
 
-/**
- * OWNER: clientes, vehículos y órdenes del tenant (API). Fallback mock.
- */
 export async function loadOwnerTenantData(accessToken) {
   const { apiJson } = await import('./api.js');
   try {
@@ -280,33 +232,15 @@ export async function loadOwnerTenantData(accessToken) {
   }
 }
 
-/**
- * CLIENT: fila en public.clients (por email de Auth + tenant del perfil) + vehículos vía API.
- */
 export async function loadClientPortalData(ctx) {
   const { apiJson } = await import('./api.js');
-  const email = (ctx.session && ctx.session.user && ctx.session.user.email && String(ctx.session.user.email).trim()) || '';
-  if (!email) {
-    throw new Error('No pudimos obtener el correo de tu cuenta.');
-  }
-  if (!ctx.profile.tenant_id) {
-    throw new Error('Tu perfil no tiene taller asignado.');
-  }
-  const { data: clientRow, error } = await ctx.supabase
-    .from('clients')
-    .select('*')
-    .eq('tenant_id', ctx.profile.tenant_id)
-    .eq('email', email)
-    .maybeSingle();
-  if (error) {
-    throw new Error(error.message || 'No se pudo cargar tu ficha de cliente.');
-  }
-  if (!clientRow) {
-    throw new Error('No encontramos tu ficha de cliente en el taller. Contacta al dueño.');
-  }
-  let vehiclesPayload;
   try {
-    vehiclesPayload = await apiJson('/api/cliente/vehicles', ctx.accessToken);
+    const me = await apiJson('/api/cliente/me', ctx.accessToken);
+    const vehiclesPayload = await apiJson('/api/cliente/vehicles', ctx.accessToken);
+    return {
+      clientRow: me.data,
+      vehicles: vehiclesPayload.data || [],
+    };
   } catch (e) {
     if (e.status === 401) {
       await logout();
@@ -314,20 +248,13 @@ export async function loadClientPortalData(ctx) {
     }
     throw e;
   }
-  return {
-    clientRow,
-    vehicles: vehiclesPayload.data || [],
-  };
 }
 
-/**
- * SUPERADMIN: resumen + lista global de tenants.
- */
 export async function loadSuperAdminData(accessToken) {
   const { apiJson } = await import('./api.js');
   try {
     const dash = await apiJson('/api/admin/dashboard', accessToken);
-    const tenants = await apiJson('/api/admin/tenants', accessToken);
+    const tenants = await apiJson('/api/admin/tenants?page=0&pageSize=500&status=all', accessToken);
     return {
       dashboard: dash.data,
       tenants: tenants.data || [],

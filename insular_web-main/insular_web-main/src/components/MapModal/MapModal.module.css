@@ -1,0 +1,151 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(21, 21, 45, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--space-md);
+  backdrop-filter: blur(8px);
+}
+
+.modalContent {
+  width: 100%;
+  max-width: 1200px;
+  height: 80vh;
+  max-height: 800px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(66, 43, 226, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  z-index: 10000;
+  background-color: rgba(21, 21, 45, 0.8);
+  border: 1px solid rgba(66, 43, 226, 0.3);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--color-text-primary);
+}
+
+.closeButton:hover {
+  background-color: var(--color-red-electrica);
+  border-color: var(--color-red-electrica);
+  color: var(--color-text-primary);
+  transform: rotate(90deg);
+}
+
+.closeButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mapWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
+}
+
+/* Override Leaflet's default styles to match theme */
+:global(.leaflet-container) {
+  background-color: var(--color-background);
+  font-family: var(--font-primary);
+}
+
+:global(.leaflet-control-attribution) {
+  display: none !important;
+}
+
+:global(.leaflet-bar a) {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-red-electrica) !important;
+  color: var(--color-red-electrica) !important;
+}
+
+:global(.leaflet-bar a:hover) {
+  background-color: var(--color-red-electrica) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Custom marker style */
+:global(.custom-marker) {
+  background-color: rgba(66, 43, 226, 0.15);
+  border: 2px solid var(--color-red-electrica);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+/* Google Maps button - matching site button style */
+.googleMapsBtn {
+  position: absolute;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 1000;
+  background-color: var(--color-red-electrica);
+  color: var(--color-text-primary) !important;
+  padding: var(--button-padding);
+  font-family: var(--font-primary);
+  font-size: var(--body-sm);
+  font-weight: 500;
+  border: 1px solid var(--color-red-electrica);
+  border-radius: var(--radius-button);
+  min-height: var(--button-min-height);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.googleMapsBtn:hover {
+  background-color: transparent;
+  border-color: var(--color-red-electrica);
+  color: var(--color-red-electrica) !important;
+  transform: var(--button-transform-hover);
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    height: 90vh;
+    max-height: none;
+    border-radius: 16px;
+  }
+
+  .closeButton {
+    top: var(--space-sm);
+    right: var(--space-sm);
+    width: 36px;
+    height: 36px;
+  }
+
+  .googleMapsBtn {
+    bottom: var(--space-md);
+    right: var(--space-md);
+    padding: 10px 20px;
+    font-size: 0.75rem;
+  }
+}

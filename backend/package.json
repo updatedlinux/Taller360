@@ -1,20 +1,34 @@
 {
   "name": "taller360-backend",
-  "version": "1.0.0",
-  "description": "API multitenant Taller360 (Supabase) - Arsys Intela",
+  "version": "2.0.0",
+  "description": "API multitenant Taller360 (SQL Server + Prisma, on-premises)",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "node --watch src/app.js"
+    "dev": "node --watch src/app.js",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.47.10",
+    "@prisma/client": "^6.3.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.3.1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

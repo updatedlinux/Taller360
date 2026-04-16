@@ -2,7 +2,8 @@ const { Router } = require('express');
 const multer = require('multer');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { httpError } = require('../middlewares/errorHandler');
-const { assertNoDbError } = require('../utils/supabaseHelpers');
+const { getPrisma } = require('../lib/prisma');
+const { inventoryOut } = require('../utils/dto');
 
 const clientsController = require('../controllers/clients.controller');
 const vehiclesController = require('../controllers/vehicles.controller');
@@ -47,10 +48,12 @@ router.post('/work-orders', asyncHandler(workOrdersController.create));
 router.get(
   '/inventory',
   asyncHandler(async (req, res) => {
-    const data = assertNoDbError(
-      await req.sb.from('inventory').select('*').eq('tenant_id', tid(req)).order('part_name'),
-    );
-    res.json({ ok: true, data: data != null ? data : [] });
+    const prisma = getPrisma();
+    const rows = await prisma.inventory.findMany({
+      where: { tenantId: tid(req) },
+      orderBy: { partName: 'asc' },
+    });
+    res.json({ ok: true, data: rows.map(inventoryOut) });
   }),
 );
 
@@ -61,19 +64,16 @@ router.post(
     if (!part_name) {
       throw httpError(400, 'part_name es obligatorio');
     }
-    const data = assertNoDbError(
-      await req.sb
-        .from('inventory')
-        .insert({
-          tenant_id: tid(req),
-          part_name,
-          stock: stock != null ? stock : 0,
-          price: price != null ? price : 0,
-        })
-        .select('*')
-        .single(),
-    );
-    res.status(201).json({ ok: true, data });
+    const prisma = getPrisma();
+    const row = await prisma.inventory.create({
+      data: {
+        tenantId: tid(req),
+        partName: part_name,
+        stock: stock != null ? Number(stock) : 0,
+        price: price != null ? Number(price) : 0,
+      },
+    });
+    res.status(201).json({ ok: true, data: inventoryOut(row) });
   }),
 );
 

@@ -1,0 +1,25 @@
+/* Card Component Styles */
+
+.card {
+  border-radius: var(--radius-module);
+  box-shadow: none;
+  padding: var(--space-lg);
+  transition: none;
+}
+
+.default {
+  background: var(--color-firma-azul);
+  color: var(--color-white);
+}
+
+.light {
+  background: var(--color-white);
+  color: var(--color-caja-fuerte);
+}
+
+.dark {
+  background: var(--color-caja-fuerte);
+  color: var(--color-white);
+}
+
+.card:hover { transform: none; box-shadow: none; }
